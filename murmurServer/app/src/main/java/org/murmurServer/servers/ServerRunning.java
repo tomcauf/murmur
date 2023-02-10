@@ -41,11 +41,11 @@ public class ServerRunning {
         }
     }
 
-    public void broadcastToAllClientsExceptMe(String message, ClientRunnable client) {
+    public void broadcastToAllClientsExceptMe(ClientRunnable client, String message) {
         System.out.printf("[broadcastAllExcept] Message envoyé : %s\n",message);
         for(ClientRunnable c : clientList) {
-            if(c != client) {
-                c.sendMessage(message);
+            if(c.isConnected() &&  c != client) {// "MSGS" esp nom_domaine esp message crlf
+                c.sendMessage("MSGS " + server.getDomain() + " " +message);
             }
         }
     }

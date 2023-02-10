@@ -95,7 +95,10 @@ public class ClientRunnable implements Runnable {
                 }
             }
             case "FOLLOW" -> System.out.println("[learnAboutMessage] FOLLOW");
-            case "MSG" -> System.out.println("[learnAboutMessage] MSG");
+            case "MSG" -> {
+                String messageToSend = messageParts[1];
+                server.broadcastToAllClientsExceptMe(this, messageToSend);
+            }
             case "DISCONNECT" -> {
                 sendMessage("+OK Bye\r\n");
                 isConnected = false;
@@ -121,6 +124,9 @@ public class ClientRunnable implements Runnable {
             result.append(characters.charAt(index));
         }
         return result.toString();
+    }
+    public boolean isConnected() {
+        return isConnected;
     }
 
 }
