@@ -1,0 +1,23 @@
+{
+    "currentDomain": "server1.godswila.guru",
+    "saltSizeInBytes": 16,
+    "multicastAddress": "224.1.1.255",
+    "multicastPort": 23845,
+    "unicastPort": 23846,
+    "relayPort": 23847,
+    "networkInterface": "eth12",
+    "base64AES": "P3FXqAUgfhy5cTjYdWlPQBJ/d6fdpbR88YsDPWPbo14\u003d",
+    "tls": true,
+    "users": [
+        {
+            "login": "swilabus",
+            "bcryptHash": "33whLKtAzvpR0pg6wB6tgPV0Bpw7F9G",
+            "bcryptRound": 14,
+            "bcryptSalt": "GRCy6kHpkf3JKAERmZrZ6u",
+            "followers": [],
+            "userTags": [],
+            "lockoutCounter": 0
+        }
+    ],
+    "tags": []
+}
