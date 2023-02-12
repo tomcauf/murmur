@@ -7,11 +7,11 @@ public class User {
     private String bcryptHash;
     private int bcryptRound;
     private String bcryptSalt;
-    private List<User> followers;
-    private List<Tags> userTags;
+    private List<String> followers;
+    private List<String> userTags;
     private int lockoutCounter;
 
-    public User(String login, String bcryptHash, int bcryptRound, String bcryptSalt, List<User> followers, List<Tags> userTags, int lockoutCounter) {
+    public User(String login, String bcryptHash, int bcryptRound, String bcryptSalt, List<String> followers, List<String> userTags, int lockoutCounter) {
         this.login = login;
         this.bcryptHash = bcryptHash;
         this.bcryptRound = bcryptRound;
@@ -54,20 +54,26 @@ public class User {
         this.bcryptSalt = bcryptSalt;
     }
 
-    public List<User> getFollowers() {
+    public List<String> getFollowers() {
         return followers;
     }
 
-    public void setFollowers(List<User> followers) {
+    public void setFollowers(List<String> followers) {
         this.followers = followers;
     }
+    public void addFollower(String user) {
+        this.followers.add(user);
+    }
 
-    public List<Tags> getUserTags() {
+    public List<String> getUserTags() {
         return userTags;
     }
 
-    public void setUserTags(List<Tags> userTags) {
+    public void setUserTags(List<String> userTags) {
         this.userTags = userTags;
+    }
+    public void addTag(String tag) {
+        this.userTags.add(tag);
     }
 
     public int getLockoutCounter() {
@@ -78,4 +84,7 @@ public class User {
         this.lockoutCounter = lockoutCounter;
     }
 
+    public void addFollowedTag(String tagName) {
+        this.userTags.add(tagName);
+    }
 }

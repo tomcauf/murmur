@@ -28,7 +28,11 @@ application {
     // Define the main class for the application.
     mainClass = 'org.murmurServer.App'
 }
-
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()

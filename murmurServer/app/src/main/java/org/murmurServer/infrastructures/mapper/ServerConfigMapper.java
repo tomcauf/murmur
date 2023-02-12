@@ -1,7 +1,7 @@
 package org.murmurServer.infrastructures.mapper;
 
 import org.murmurServer.domains.Server;
-import org.murmurServer.domains.Tags;
+import org.murmurServer.domains.Tag;
 import org.murmurServer.domains.User;
 
 import java.io.*;
@@ -30,7 +30,7 @@ public class ServerConfigMapper {
             String base64AES = "";
             boolean tls = false;
             List<User> userList = new ArrayList<>();
-            List<Tags> tagsList = new ArrayList<>();
+            List<Tag> tagsList = new ArrayList<>();
             while (line != null) {
                 if (line.contains("currentDomain")) {
                     currentDomain = line.split(":")[1].replace("\"", "").replace(",", "").trim();
@@ -55,8 +55,8 @@ public class ServerConfigMapper {
                     String bcryptHash = "";
                     int bcryptRound = 0;
                     String bcryptSalt = "";
-                    List<User> followers = new ArrayList<>();
-                    List<Tags> userTags = new ArrayList<>();
+                    List<String> followers = new ArrayList<>();
+                    List<String> userTags = new ArrayList<>();
                     int lockoutCounter = 0;
                     line = reader.readLine();
                     while (!line.contains("]")) {
@@ -93,7 +93,7 @@ public class ServerConfigMapper {
                 } else if (line.contains("tags")) {
                     while (!line.contains("]")) {
                         if (line.contains("name")) {
-                            tagsList.add(new Tags());
+                            tagsList.add(new Tag(line.split(":")[1].replace("\"", "").replace(",", "").trim()));
                         }
                         line = reader.readLine();
                     }
