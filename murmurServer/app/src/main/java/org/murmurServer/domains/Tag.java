@@ -6,9 +6,9 @@ import java.util.List;
 public class Tag {
     String name;
     List<String> users;
-    public Tag(String name) {
+    public Tag(String name, List<String> users) {
         this.name = name;
-        this.users = new ArrayList<>();
+        this.users = users;
     }
     public String getName() {
         return name;

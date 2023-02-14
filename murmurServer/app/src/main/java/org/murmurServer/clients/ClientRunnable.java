@@ -162,6 +162,7 @@ public class ClientRunnable implements Runnable {
         }
         return hexString.toString();
     }
+
     private String generateRandomString(int length) {
         String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#&@.?!/%*";
         StringBuilder result = new StringBuilder();
@@ -171,6 +172,7 @@ public class ClientRunnable implements Runnable {
         }
         return result.toString();
     }
+
     public boolean isConnected() {
         return isConnected;
     }

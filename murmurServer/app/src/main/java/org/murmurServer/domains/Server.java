@@ -1,5 +1,6 @@
 package org.murmurServer.domains;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Server {
@@ -46,7 +47,7 @@ public class Server {
 
     public void addTagIfNotExist(String tagName) {
         if (tagsList.stream().noneMatch(t -> t.getName().equals(tagName))) {
-            tagsList.add(new Tag(tagName));
+            tagsList.add(new Tag(tagName, new ArrayList<>()));
         }
     }
 
@@ -59,5 +60,41 @@ public class Server {
 
     public int getUnicastPort() {
         return unicastPort;
+    }
+
+    public int getSaltSizeInBytes() {
+        return saltSizeInBytes;
+    }
+
+    public String getMulticastAddress() {
+        return multicastAddress;
+    }
+
+    public int getMulticastPort() {
+        return multicastPort;
+    }
+
+    public int getRelayPort() {
+        return relayPort;
+    }
+
+    public String getNetworkInterface() {
+        return networkInterface;
+    }
+
+    public String getBase64AES() {
+        return base64AES;
+    }
+
+    public boolean isTls() {
+        return tls;
+    }
+
+    public List<User> getUserList() {
+        return userList;
+    }
+
+    public List<Tag> getTagsList() {
+        return tagsList;
     }
 }
