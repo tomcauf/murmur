@@ -1,7 +1,7 @@
 package org.murmurServer.clients;
 
 import org.murmurServer.domains.User;
-import org.murmurServer.servers.ServerRunning;
+import org.murmurServer.servers.ServerManager;
 
 import java.io.*;
 import java.net.Socket;
@@ -9,17 +9,18 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ClientRunnable implements Runnable {
     private User user;
     private Socket client;
-    private ServerRunning server;
+    private ServerManager server;
     private BufferedReader in;
     private PrintWriter out;
     private boolean isConnected = false;
     private String randomString;
 
-    public ClientRunnable(Socket client, ServerRunning server) {
+    public ClientRunnable(Socket client, ServerManager server) {
         this.client = client;
         this.server = server;
         randomString = generateRandomString(22);
@@ -42,12 +43,15 @@ public class ClientRunnable implements Runnable {
                 handleMessage(line);
                 line = in.readLine();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println("[!] Error ClientRunnable.run: " + e.getMessage());
         }
     }
     public void sendMessage(String message) {
         out.println(message);
+    }
+    public void sendMessage(String message, String from) {
+        sendMessage(String.format("%s %s%s%s %s \r\n", "MSGS", from,"@",server.getDomain(), message));
     }
     private void handleMessage(String message)  {
         String[] messageParts = message.split(" ");
@@ -80,7 +84,7 @@ public class ClientRunnable implements Runnable {
             }
             case "CONFIRM" ->   {
                 String sha3Hex = messageParts[1];
-                String sha3HexToCompare = "";
+                String sha3HexToCompare;
                 try {
                     MessageDigest digest = MessageDigest.getInstance("SHA3-256");
                     byte[] hash = digest.digest((randomString + "$2b$"+ user.getBcryptRound() +"$" + user.getBcryptSalt() + user.getBcryptHash()).getBytes(StandardCharsets.UTF_8));
@@ -94,10 +98,52 @@ public class ClientRunnable implements Runnable {
                     e.printStackTrace();
                 }
             }
-            case "FOLLOW" -> System.out.println("[learnAboutMessage] FOLLOW");
+            case "FOLLOW" -> {//FOLLOW (nom@domaine / #tag@domaine) crlf
+                //Je dois récupérer la partie nom@domain ou #tag@domaine
+                String name = messageParts[1];
+                //Je dois vérifier si c'est un tag ou un nom
+                if(name.startsWith("#")){
+                    //C'est un tag donc pour construire mon objet tag, je dois récupérer le nom du tag sans le # et le user@domaine
+                    String tagName = name.substring(0, name.indexOf("@"));
+                    String userDomain = name.substring(name.indexOf("@")+1);
+                    String userName = user.getLogin();
+                    System.out.println("tagname : " + tagName + " userDomain : " + userDomain + " userName : " + userName);
+                    //Est-ce que le user suit déjà ce tag ?
+                    System.out.println("user.getUserTags() : " + user.getUserTags().toString());
+                    if(!user.getUserTags().contains(tagName)){
+                        //Si non, je dois ajouter le tag à la liste des tags suivis par le user
+                        user.addFollowedTag(name);
+                        System.out.println("addFollowedTag");
+                        server.addTagIfNotExist(tagName);
+                        System.out.println("addTagIfNotExist");
+                        server.addUserToTag(tagName, userName+"@"+userDomain);
+                        System.out.println("addUserToTag");
+                        sendMessage("+OK You are now following " + tagName + "\r\n");
+                    }else {
+                        sendMessage("-ERR Error while following " + tagName + "\r\n");
+                    }
+
+                }
+                else{
+                    String userName = name.substring(0, name.indexOf("@"));
+                    String userDomain = name.substring(name.indexOf("@")+1);
+                    if(userDomain.equals(server.getDomain())){
+                        User userToFollow = server.getUserByName(userName);
+                        if(userToFollow != null && !userToFollow.getLogin().equals(user.getLogin()) && !userToFollow.getFollowers().contains(user.getLogin()+"@"+server.getDomain())){
+                            userToFollow.addFollower(user.getLogin()+"@"+server.getDomain());
+                            sendMessage("+OK You are now following " + userName + "\r\n");
+                        }else{
+                            sendMessage("-ERR Error while following " + userName + "\r\n");
+                        }
+                    } else {
+                        sendMessage("-ERR Error while following " + userName + " with domain " + userDomain + "\r\n");
+                    }
+                }
+
+            }
             case "MSG" -> {
-                String messageToSend = messageParts[1];
-                server.broadcastToAllClientsExceptMe(this, messageToSend);
+                String messageToSend = message.substring(message.indexOf(" ")+1);
+                server.broadcastToAllClients(this, messageToSend);
             }
             case "DISCONNECT" -> {
                 sendMessage("+OK Bye\r\n");
@@ -116,6 +162,7 @@ public class ClientRunnable implements Runnable {
         }
         return hexString.toString();
     }
+
     private String generateRandomString(int length) {
         String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#&@.?!/%*";
         StringBuilder result = new StringBuilder();
@@ -125,8 +172,19 @@ public class ClientRunnable implements Runnable {
         }
         return result.toString();
     }
+
     public boolean isConnected() {
         return isConnected;
     }
 
+    public List<String> getFollowerList() {
+        return user.getFollowers();
+    }
+
+    public List<String> getTagList() {
+        return user.getUserTags();
+    }
+    public String getUserName() {
+        return user.getLogin();
+    }
 }

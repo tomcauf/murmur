@@ -1,12 +1,17 @@
 package org.murmurServer.infrastructures.mapper;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.murmurServer.domains.Server;
-import org.murmurServer.domains.Tags;
+import org.murmurServer.domains.Tag;
 import org.murmurServer.domains.User;
+import org.murmurServer.infrastructures.dto.ServerDto;
+import org.murmurServer.infrastructures.dto.TagDto;
+import org.murmurServer.infrastructures.dto.UserDto;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ServerConfigMapper {
     private final String path;
@@ -18,100 +23,42 @@ public class ServerConfigMapper {
     }
 
     public Server getServer() {
+        Gson gson = new Gson();
+
         try (BufferedReader reader = new BufferedReader(new FileReader(path + "/" + fileName))) {
-            String line = reader.readLine();
-            String currentDomain = "";
-            int saltSizeInBytes = 0;
-            String multicastAddress = "";
-            int multicastPort = 0;
-            int unicastPort = 0;
-            int relayPort = 0;
-            String networkInterface = "";
-            String base64AES = "";
-            boolean tls = false;
-            List<User> userList = new ArrayList<>();
-            List<Tags> tagsList = new ArrayList<>();
-            while (line != null) {
-                if (line.contains("currentDomain")) {
-                    currentDomain = line.split(":")[1].replace("\"", "").replace(",", "").trim();
-                } else if (line.contains("saltSizeInBytes")) {
-                    saltSizeInBytes = Integer.parseInt(line.split(":")[1].replace("\"", "").replace(",", "").trim());
-                } else if (line.contains("multicastAddress")) {
-                    multicastAddress = line.split(":")[1].replace("\"", "").replace(",", "").trim();
-                } else if (line.contains("multicastPort")) {
-                    multicastPort = Integer.parseInt(line.split(":")[1].replace("\"", "").replace(",", "").trim());
-                } else if (line.contains("unicastPort")) {
-                    unicastPort = Integer.parseInt(line.split(":")[1].replace("\"", "").replace(",", "").trim());
-                } else if (line.contains("relayPort")) {
-                    relayPort = Integer.parseInt(line.split(":")[1].replace("\"", "").replace(",", "").trim());
-                } else if (line.contains("networkInterface")) {
-                    networkInterface = line.split(":")[1].replace("\"", "").replace(",", "").trim();
-                } else if (line.contains("base64AES")) {
-                    base64AES = line.split(":")[1].replace("\"", "").replace(",", "").trim();
-                } else if (line.contains("tls")) {
-                    tls = Boolean.parseBoolean(line.split(":")[1].replace("\"", "").replace(",", "").trim());
-                } else if (line.contains("users")) {
-                    String login = "";
-                    String bcryptHash = "";
-                    int bcryptRound = 0;
-                    String bcryptSalt = "";
-                    List<User> followers = new ArrayList<>();
-                    List<Tags> userTags = new ArrayList<>();
-                    int lockoutCounter = 0;
-                    line = reader.readLine();
-                    while (!line.contains("]")) {
-                        if (line.contains("login")) {
-                            login = line.split(":")[1].replace("\"", "").replace(",", "").trim();
-                        } else if (line.contains("bcryptHash")) {
-                            bcryptHash = line.split(":")[1].replace("\"", "").replace(",", "").trim();
-                        } else if (line.contains("bcryptRound")) {
-                            bcryptRound = Integer.parseInt(line.split(":")[1].replace("\"", "").replace(",", "").trim());
-                        } else if (line.contains("bcryptSalt")) {
-                            bcryptSalt = line.split(":")[1].replace("\"", "").replace(",", "").trim();
-                        } else if (line.contains("followers")) {
-                            line = reader.readLine();
-                            while (!line.contains("]")) {
-                                if (line.contains("login")) {
-                                    //followers.add(new User(line.split(":")[1].replace("\"","").replace(",","").trim()));
-                                }
-                                line = reader.readLine();
-                            }
-                        } else if (line.contains("userTags")) {
-                            line = reader.readLine();
-                            while (!line.contains("]")) {
-                                if (line.contains("name")) {
-                                    //userTags.add(line.split(":")[1].replace("\"","").replace(",","").trim());
-                                }
-                                line = reader.readLine();
-                            }
-                        } else if (line.contains("lockoutCounter")) {
-                            lockoutCounter = Integer.parseInt(line.split(":")[1].replace("\"", "").replace(",", "").trim());
-                        }
-                        line = reader.readLine();
-                    }
-                    userList.add(new User(login, bcryptHash, bcryptRound, bcryptSalt, followers, userTags, lockoutCounter));
-                } else if (line.contains("tags")) {
-                    while (!line.contains("]")) {
-                        if (line.contains("name")) {
-                            tagsList.add(new Tags());
-                        }
-                        line = reader.readLine();
-                    }
-                }
-                line = reader.readLine();
+            String file;
+            StringBuilder builder = new StringBuilder();
+            while ((file = reader.readLine()) != null) {
+                builder.append(file);
             }
-            return new Server(currentDomain, saltSizeInBytes, multicastAddress, multicastPort, unicastPort, relayPort, networkInterface, base64AES, tls, userList, tagsList);
+            file = builder.toString();
+            ServerDto server = gson.fromJson(file, ServerDto.class);
+            System.out.println(server.getDomain() + " " + server.getSaltSizeInBytes() + " " + server.getMulticastAddress() + " " + server.getMulticastPort() + " " + server.getUnicastPort() + " " + server.getRelayPort() + " " + server.getNetworkInterface() + " " + server.getBase64AES() + " " + server.isTls());
+            List<User> users = server.getUserList().stream().map(u -> new User(u.getLogin(), u.getBCryptHash(), u.getBCryptRound(), u.getBCryptSalt(), u.getFollowers(), u.getUserTags(), u.getLockoutCounter())).collect(Collectors.toList());
+            List<Tag> tags = server.getTagsList().stream().map(t -> new Tag(t.getName(), t.getUsers())).collect(Collectors.toList());
+            return new Server(server.getDomain(), server.getSaltSizeInBytes(), server.getMulticastAddress(), server.getMulticastPort(), server.getUnicastPort(), server.getRelayPort(), server.getNetworkInterface(), server.getBase64AES(), server.isTls(), users, tags);
         } catch (IOException e) {
             System.out.println("[!] Error ServerConfigMapper.getServer: " + e.getMessage());
+            return null;
+        } catch (JsonSyntaxException e) {
+            System.out.println("[!] Error ServerConfigMapper.getServer JSON: " + e.getMessage());
+            return null;
         }
-        return null;
     }
 
     public void writeServer(Server server) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(path + "/" + fileName))) {
-        } catch (IOException e) {
-            System.out.println("[!] Error ServerConfigMapper.writeServer: " + e.getMessage());
-        }
+        Gson gson = new Gson();
+       try(BufferedWriter writer = new BufferedWriter(new FileWriter(path + "/" + fileName))){
+           List<UserDto> users = server.getUserList().stream().map(u -> new UserDto(u.getLogin(), u.getBcryptHash(), u.getBcryptRound(), u.getBcryptSalt(), u.getFollowers(), u.getUserTags(), u.getLockoutCounter())).collect(Collectors.toList());
+           List<TagDto> tags = server.getTagsList().stream().map(t -> new TagDto(t.getName(), t.getUsers())).collect(Collectors.toList());
+           ServerDto serverDto = new ServerDto(server.getDomain(), server.getSaltSizeInBytes(), server.getMulticastAddress(), server.getMulticastPort(), server.getUnicastPort(), server.getRelayPort(), server.getNetworkInterface(), server.getBase64AES(), server.isTls(), users, tags);
+
+              writer.write(gson.toJson(serverDto));
+       }catch (IOException e) {
+           System.out.println("[!] Error ServerConfigMapper.writeServer: " + e.getMessage());
+       } catch (JsonSyntaxException e) {
+           System.out.println("[!] Error ServerConfigMapper.writeServer JSON: " + e.getMessage());
+       }
     }
 
 }

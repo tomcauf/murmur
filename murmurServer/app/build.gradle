@@ -22,13 +22,20 @@ dependencies {
 
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:30.1-jre'
+
+    // Gson is used to serialize and deserialize JSON
+    implementation 'com.google.code.gson:gson:2.10.1'
 }
 
 application {
     // Define the main class for the application.
     mainClass = 'org.murmurServer.App'
 }
-
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
