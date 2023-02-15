@@ -3,6 +3,7 @@ package org.murmurServer.clients;
 import org.murmurServer.domains.User;
 import org.murmurServer.servers.ServerManager;
 
+import javax.net.ssl.SSLSocket;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -13,14 +14,14 @@ import java.util.List;
 
 public class ClientRunnable implements Runnable {
     private User user;
-    private Socket client;
+    private SSLSocket client;
     private ServerManager server;
     private BufferedReader in;
     private PrintWriter out;
     private boolean isConnected = false;
     private String randomString;
 
-    public ClientRunnable(Socket client, ServerManager server) {
+    public ClientRunnable(SSLSocket client, ServerManager server) {
         this.client = client;
         this.server = server;
         randomString = generateRandomString(22);
@@ -68,6 +69,7 @@ public class ClientRunnable implements Runnable {
                     sendMessage("-ERR User already exists\r\n");
                 } else {
                     server.addUser(user);
+                    server.saveServer();
                     this.user = user;
                     sendMessage("+OK Welcome " + name + "\r\n");
                 }
@@ -99,25 +101,16 @@ public class ClientRunnable implements Runnable {
                 }
             }
             case "FOLLOW" -> {//FOLLOW (nom@domaine / #tag@domaine) crlf
-                //Je dois récupérer la partie nom@domain ou #tag@domaine
                 String name = messageParts[1];
-                //Je dois vérifier si c'est un tag ou un nom
                 if(name.startsWith("#")){
-                    //C'est un tag donc pour construire mon objet tag, je dois récupérer le nom du tag sans le # et le user@domaine
                     String tagName = name.substring(0, name.indexOf("@"));
                     String userDomain = name.substring(name.indexOf("@")+1);
                     String userName = user.getLogin();
-                    System.out.println("tagname : " + tagName + " userDomain : " + userDomain + " userName : " + userName);
-                    //Est-ce que le user suit déjà ce tag ?
-                    System.out.println("user.getUserTags() : " + user.getUserTags().toString());
                     if(!user.getUserTags().contains(tagName)){
-                        //Si non, je dois ajouter le tag à la liste des tags suivis par le user
                         user.addFollowedTag(name);
-                        System.out.println("addFollowedTag");
                         server.addTagIfNotExist(tagName);
-                        System.out.println("addTagIfNotExist");
                         server.addUserToTag(tagName, userName+"@"+userDomain);
-                        System.out.println("addUserToTag");
+                        server.saveServer();
                         sendMessage("+OK You are now following " + tagName + "\r\n");
                     }else {
                         sendMessage("-ERR Error while following " + tagName + "\r\n");
@@ -131,6 +124,7 @@ public class ClientRunnable implements Runnable {
                         User userToFollow = server.getUserByName(userName);
                         if(userToFollow != null && !userToFollow.getLogin().equals(user.getLogin()) && !userToFollow.getFollowers().contains(user.getLogin()+"@"+server.getDomain())){
                             userToFollow.addFollower(user.getLogin()+"@"+server.getDomain());
+                            server.saveServer();
                             sendMessage("+OK You are now following " + userName + "\r\n");
                         }else{
                             sendMessage("-ERR Error while following " + userName + "\r\n");

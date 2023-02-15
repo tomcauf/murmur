@@ -1,23 +1,34 @@
 {
-    "currentDomain": "localhost",
-    "saltSizeInBytes": 16,
-    "multicastAddress": "224.1.1.255",
-    "multicastPort": 23845,
-    "unicastPort": 12020,
-    "relayPort": 23847,
-    "networkInterface": "eth12",
-    "base64AES": "P3FXqAUgfhy5cTjYdWlPQBJ/d6fdpbR88YsDPWPbo14\u003d",
-    "tls": true,
-    "users": [
-        {
-            "login": "swilabus",
-            "bcryptHash": "33whLKtAzvpR0pg6wB6tgPV0Bpw7F9G",
-            "bcryptRound": 14,
-            "bcryptSalt": "GRCy6kHpkf3JKAERmZrZ6u",
-            "followers": [],
-            "userTags": [],
-            "lockoutCounter": 0
-        }
-    ],
-    "tags": []
+  "currentDomain": "server1.godswila.guru",
+  "saltSizeInBytes": 16,
+  "multicastAddress": "224.1.1.255",
+  "multicastPort": 23845,
+  "unicastPort": 12020,
+  "relayPort": 23847,
+  "networkInterface": "eth12",
+  "base64AES": "P3FXqAUgfhy5cTjYdWlPQBJ/d6fdpbR88YsDPWPbo14\u003d",
+  "tls": true,
+  "users": [
+    {
+      "login": "swilabus",
+      "bcryptHash": "33whLKtAzvpR0pg6wB6tgPV0Bpw7F9G",
+      "bcryptRound": 14,
+      "bcryptSalt": "GRCy6kHpkf3JKAERmZrZ6u",
+      "followers": [
+        "godswila@server1.godswila.guru"
+      ],
+      "userTags": [],
+      "lockoutCounter": 0
+    },
+    {
+      "login": "godswila",
+      "bcryptHash": "57YVuHSnYGpBNdJ5xT0hCnOg8l2ngj2",
+      "bcryptRound": 14,
+      "bcryptSalt": "jE9QQ62oGQ1oVGS2WK7sse",
+      "followers": [],
+      "userTags": [],
+      "lockoutCounter": 0
+    }
+  ],
+  "tags": []
 }
