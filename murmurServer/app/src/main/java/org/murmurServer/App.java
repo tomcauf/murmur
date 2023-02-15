@@ -1,27 +1,15 @@
 package org.murmurServer;
 
-import org.murmurServer.domains.Server;
-import org.murmurServer.infrastructures.mapper.ServerConfigMapper;
-import org.murmurServer.servers.ServerManager;
-
-import java.nio.file.Paths;
+import org.murmurServer.servers.ServerFactory;
 
 public class App {
+    private static final String CONFIG_FILE_NAME = "server1.json";
+    private static final String CERTIFICATE_FILE_NAME = "star.godswila.guru.p12";
+    private static final String CERTIFICATE_PASSWORD = "labo2023";
+
     public static void main(String[] args) {
         System.out.println("[*] Program started");
-        String configFolder;
-        if(Paths.get("").toAbsolutePath().toString().contains("app")) {
-            configFolder = Paths.get("","src","main","resources","config").toAbsolutePath().toString();
-        } else {
-            configFolder = Paths.get("","app","src","main","resources","config").toAbsolutePath().toString();
-        }
-        ServerConfigMapper mapper = new ServerConfigMapper(configFolder, "server1.json");
-        if(mapper.getServer() == null) {
-            System.out.println("[!] Error main: mapper is null");
-            return;
-        }
-        Server server = mapper.getServer();
-        ServerManager serverRunning = new ServerManager(server);
-        serverRunning.startServer();
+        ServerFactory serverFactory = new ServerFactory(CONFIG_FILE_NAME, CERTIFICATE_FILE_NAME, CERTIFICATE_PASSWORD);
+        serverFactory.createServerAndStartIt();
     }
 }

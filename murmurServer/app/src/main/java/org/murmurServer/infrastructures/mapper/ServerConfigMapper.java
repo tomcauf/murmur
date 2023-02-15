@@ -8,12 +8,14 @@ import org.murmurServer.domains.User;
 import org.murmurServer.infrastructures.dto.ServerDto;
 import org.murmurServer.infrastructures.dto.TagDto;
 import org.murmurServer.infrastructures.dto.UserDto;
+import org.murmurServer.repositories.IServerRepositories;
 
 import java.io.*;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ServerConfigMapper {
+public class ServerConfigMapper implements IServerRepositories {
     private final String path;
     private final String fileName;
 
@@ -22,10 +24,11 @@ public class ServerConfigMapper {
         this.fileName = fileName;
     }
 
+    @Override
     public Server getServer() {
         Gson gson = new Gson();
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(path + "/" + fileName))) {
+        String configFilePath = Paths.get(path, fileName).toAbsolutePath().toString();
+        try (BufferedReader reader = new BufferedReader(new FileReader(configFilePath))) {
             String file;
             StringBuilder builder = new StringBuilder();
             while ((file = reader.readLine()) != null) {
@@ -33,7 +36,6 @@ public class ServerConfigMapper {
             }
             file = builder.toString();
             ServerDto server = gson.fromJson(file, ServerDto.class);
-            System.out.println(server.getDomain() + " " + server.getSaltSizeInBytes() + " " + server.getMulticastAddress() + " " + server.getMulticastPort() + " " + server.getUnicastPort() + " " + server.getRelayPort() + " " + server.getNetworkInterface() + " " + server.getBase64AES() + " " + server.isTls());
             List<User> users = server.getUserList().stream().map(u -> new User(u.getLogin(), u.getBCryptHash(), u.getBCryptRound(), u.getBCryptSalt(), u.getFollowers(), u.getUserTags(), u.getLockoutCounter())).collect(Collectors.toList());
             List<Tag> tags = server.getTagsList().stream().map(t -> new Tag(t.getName(), t.getUsers())).collect(Collectors.toList());
             return new Server(server.getDomain(), server.getSaltSizeInBytes(), server.getMulticastAddress(), server.getMulticastPort(), server.getUnicastPort(), server.getRelayPort(), server.getNetworkInterface(), server.getBase64AES(), server.isTls(), users, tags);
@@ -46,6 +48,7 @@ public class ServerConfigMapper {
         }
     }
 
+    @Override
     public void writeServer(Server server) {
         Gson gson = new Gson();
        try(BufferedWriter writer = new BufferedWriter(new FileWriter(path + "/" + fileName))){
