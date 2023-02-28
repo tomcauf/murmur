@@ -22,8 +22,8 @@ public class SocketManager {
 
         SSLServerSocketFactory ssf = sslContext.getServerSocketFactory();
         //TODO: Doit récupérer l'adresse IP du fichier config => server1.godswila.guru
-        serverSocket = (SSLServerSocket) ssf.createServerSocket(port, 100, InetAddress.getByName("server1.godswila.guru"));
-        System.out.printf("[*] Server started on %s and port %d\n",serverSocket.getInetAddress().getHostName(),port);
+        serverSocket = (SSLServerSocket) ssf.createServerSocket(port, 50, InetAddress.getByName("server1.godswila.guru"));
+        System.out.printf("[*] Server started on %s and port %d\n",serverSocket.getInetAddress().getHostAddress(),port);
     }
 
     public SSLSocket acceptClient() throws IOException {

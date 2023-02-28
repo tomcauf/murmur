@@ -87,4 +87,8 @@ public class User {
     public void addFollowedTag(String tagName) {
         this.userTags.add(tagName);
     }
+
+    public boolean haveTag(String tagName) {
+        return this.userTags.contains(tagName);
+    }
 }
