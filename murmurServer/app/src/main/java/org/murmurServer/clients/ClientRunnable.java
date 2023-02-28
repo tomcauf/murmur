@@ -32,7 +32,8 @@ public class ClientRunnable implements Runnable {
         } catch (IOException e) {
             System.out.println("[!] Error ClientRunnable: " + e.getMessage());
         }
-        sendMessage("HELLO localhost "+ randomString +"\r\n");
+        //TODO: Recup le nom du serveur
+        sendMessage("HELLO server1.godswila.guru "+ randomString +"\r\n");
     }
 
     @Override
@@ -50,6 +51,7 @@ public class ClientRunnable implements Runnable {
     }
     public void sendMessage(String message) {
         out.println(message);
+        out.flush();
     }
     public void sendMessage(String message, String from) {
         sendMessage(String.format("%s %s%s%s %s \r\n", "MSGS", from,"@",server.getDomain(), message));

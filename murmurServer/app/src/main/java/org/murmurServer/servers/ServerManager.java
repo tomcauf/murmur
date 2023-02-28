@@ -12,10 +12,10 @@ import java.util.*;
 
 public class ServerManager {
     private final List<ClientRunnable> clientList;
-    private IServerRepositories repositories;
-    private Server server;
+    private final IServerRepositories repositories;
+    private final Server server;
     private final MessageDispatch messageDispatch;
-    private TLSSocketFactory tlsSocketFactory;
+    private final TLSSocketFactory tlsSocketFactory;
     private boolean stop = false;
     public ServerManager(IServerRepositories repositories, TLSSocketFactory tlsSocketFactory) {
         this.repositories = repositories;
