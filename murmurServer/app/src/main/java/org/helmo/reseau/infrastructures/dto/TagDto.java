@@ -1,4 +1,4 @@
-package org.murmurServer.infrastructures.dto;
+package org.helmo.reseau.infrastructures.dto;
 
 import java.util.List;
 

@@ -1,6 +1,7 @@
-package org.murmurServer.servers;
+package org.helmo.reseau.servers;
 
-import org.murmurServer.clients.ClientRunnable;
+import org.helmo.reseau.clients.ClientRunnable;
+import org.helmo.reseau.clients.Entity;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,6 +19,9 @@ public class MessageDispatch {
                 client.sendMessage(message, author.getUserName());
             }
         }
+    }
+    public void dispatchMessageToUser(Entity client, String message){
+        client.sendMessage(message);
     }
     //Doit être dans la class de task
     private List<ClientRunnable> getFollowers(List<ClientRunnable> clients, ClientRunnable author){

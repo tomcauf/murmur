@@ -1,4 +1,4 @@
-package org.murmurServer.domains;
+package org.helmo.reseau.domains;
 
 import java.util.ArrayList;
 import java.util.List;

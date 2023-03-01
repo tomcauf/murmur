@@ -1,8 +1,8 @@
-package org.murmurServer.servers;
+package org.helmo.reseau.servers;
 
-import org.murmurServer.domains.Server;
-import org.murmurServer.infrastructures.mapper.ServerConfigMapper;
-import org.murmurServer.repositories.IServerRepositories;
+import org.helmo.reseau.domains.Server;
+import org.helmo.reseau.infrastructures.mapper.ServerConfigMapper;
+import org.helmo.reseau.repositories.IServerRepositories;
 
 import java.nio.file.Paths;
 

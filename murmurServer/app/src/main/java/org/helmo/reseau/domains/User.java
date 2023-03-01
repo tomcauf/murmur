@@ -1,4 +1,4 @@
-package org.murmurServer.domains;
+package org.helmo.reseau.domains;
 
 import java.util.List;
 
@@ -86,5 +86,9 @@ public class User {
 
     public void addFollowedTag(String tagName) {
         this.userTags.add(tagName);
+    }
+
+    public boolean haveTag(String tagName) {
+        return this.userTags.contains(tagName);
     }
 }

@@ -1,6 +1,9 @@
-package org.murmurServer.servers;
+package org.helmo.reseau.servers;
 
-import javax.net.ssl.*;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import java.io.FileInputStream;
 import java.nio.file.Paths;
 import java.security.KeyStore;
@@ -32,23 +35,6 @@ public class TLSSocketFactory {
         sc.init(kmf.getKeyManagers(), trustManagers, null);
 
         return sc;
-        /**
-         * String certificateAbsolutePath = Paths.get(certificatePath, certificateName).toAbsolutePath().toString();
-         *         KeyStore keyStore = KeyStore.getInstance("PKCS12");
-         *         keyStore.load(new FileInputStream(certificateAbsolutePath), password.toCharArray());
-         *
-         *         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-         *         keyManagerFactory.init(keyStore, password.toCharArray());
-         *
-         *         TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-         *         trustManagerFactory.init(keyStore);
-         *
-         *         SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
-         *         TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-         *         sslContext.init(keyManagerFactory.getKeyManagers(), trustManagers, null);
-         *
-         *         return sslContext;
-         */
     }
 
 

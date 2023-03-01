@@ -1,18 +1,17 @@
-package org.murmurServer.clients;
+package org.helmo.reseau.clients;
 
-import org.murmurServer.domains.User;
-import org.murmurServer.servers.ServerManager;
+import org.helmo.reseau.domains.User;
+import org.helmo.reseau.servers.ServerManager;
 
 import javax.net.ssl.SSLSocket;
 import java.io.*;
-import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClientRunnable implements Runnable {
+public class ClientRunnable implements Runnable, Entity, Closeable {
     private User user;
     private SSLSocket client;
     private ServerManager server;
@@ -24,16 +23,17 @@ public class ClientRunnable implements Runnable {
     public ClientRunnable(SSLSocket client, ServerManager server) {
         this.client = client;
         this.server = server;
-        randomString = generateRandomString(22);
         try {
+            this.randomString = randomString(22);
             in = new BufferedReader(new InputStreamReader(client.getInputStream(), StandardCharsets.UTF_8));
             out = new PrintWriter(new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8), true);
+            System.out.println("[+] ClientRunnable created");
             isConnected = true;
         } catch (IOException e) {
             System.out.println("[!] Error ClientRunnable: " + e.getMessage());
+            server.createDisconnectTask(this);
         }
-        //TODO: Recup le nom du serveur
-        sendMessage("HELLO server1.godswila.guru "+ randomString +"\r\n");
+        server.createHelloTask(this, randomString);
     }
 
     @Override
@@ -47,17 +47,65 @@ public class ClientRunnable implements Runnable {
             }
         } catch (Exception e) {
             System.out.println("[!] Error ClientRunnable.run: " + e.getMessage());
+            server.createDisconnectTask(this);
         }
     }
+    @Override
     public void sendMessage(String message) {
+        System.out.println("[ClientRunnable] sendMessage: "+ message);
         out.println(message);
-        out.flush();
     }
+
+    @Override
+    public List<String> getFollowers() {
+        return user.getFollowers();
+    }
+
+    @Override
+    public String getName() {
+        if(user == null) return "null";
+        return user.getLogin() + "@" + server.getDomain();
+    }
+
+    @Override
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    @Override
+    public String getRandomString() {
+        return randomString;
+    }
+
+    @Override
+    public User getUser() {
+        return user;
+    }
+
+    @Override
+    public void setConnectionStatus(boolean b) {
+        isConnected = b;
+    }
+
+    @Override
+    public boolean isFollowingTag(String tag) {
+        return user.haveTag(tag);
+    }
+
+    @Override
+    public void addFollowTag(String tagName) {
+        user.addTag(tagName);
+    }
+
+    //TODO: Doit disparaitre
     public void sendMessage(String message, String from) {
         sendMessage(String.format("%s %s%s%s %s \r\n", "MSGS", from,"@",server.getDomain(), message));
     }
     private void handleMessage(String message)  {
-        String[] messageParts = message.split(" ");
+        //System.out.println("[ClientRunnable] handleMessage: "+ message);
+        server.createTask(message, this);
+
+        /*String[] messageParts = message.split(" ");
         switch (messageParts[0]) {
             case "REGISTER" -> {
                 String name = messageParts[1];
@@ -146,7 +194,7 @@ public class ClientRunnable implements Runnable {
                 isConnected = false;
             }
             default -> System.out.println("[learnAboutMessage] Unknown message");
-        }
+        }*/
     }
 
     private String bytesToHex(byte[] hash) {
@@ -157,16 +205,6 @@ public class ClientRunnable implements Runnable {
             hexString.append(hex);
         }
         return hexString.toString();
-    }
-
-    private String generateRandomString(int length) {
-        String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#&@.?!/%*";
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            int index = (int) (Math.random() * characters.length());
-            result.append(characters.charAt(index));
-        }
-        return result.toString();
     }
 
     public boolean isConnected() {
@@ -182,5 +220,21 @@ public class ClientRunnable implements Runnable {
     }
     public String getUserName() {
         return user.getLogin();
+    }
+    private String randomString(int length) {
+        String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#&@.?!/%*";
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int index = (int) (Math.random() * characters.length());
+            result.append(characters.charAt(index));
+        }
+        return result.toString();
+    }
+
+    @Override
+    public void close() throws IOException {
+        in.close();
+        out.close();
+        client.close();
     }
 }

@@ -1,6 +1,6 @@
-package org.murmurServer.repositories;
+package org.helmo.reseau.repositories;
 
-import org.murmurServer.domains.Server;
+import org.helmo.reseau.domains.Server;
 
 public interface IServerRepositories {
     Server getServer();
