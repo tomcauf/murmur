@@ -7,7 +7,7 @@ public class Protocol {
     private final String RX_LETTRE = "[a-zA-Z]";
     private final String RX_LETTRE_CHIFFRE = String.format("[%s%s]", RX_LETTRE, RX_CHIFFRE);
     private final String RX_CARACTERE_IMPRIMABLE = "[\\x20-\\xff]";
-    private final String RX_CRLF = "[\\x0d\\x0a]"; // OU => [\\r\\n]
+    private final String RX_CRLF = "\\x0d\\x0a"; // OU => \\r\\n
     private final String RX_SYMBOLE = "[\\x21-\\x2f\\x3a-\\x40\\x5b-\\x60]";
     private final String RX_ESP = "\\x20";
     private final String RX_DOMAINE = String.format("[%s%s]{5,200}", RX_LETTRE_CHIFFRE,"\\x2e");
@@ -27,23 +27,23 @@ public class Protocol {
     private final String RX_ID_DOMAINE = String.format("%s{1,5}@%s", RX_CHIFFRE, RX_DOMAINE);
 
     // Echanges entre le client et le Murmur Server :
-    private final String RX_HELLO = String.format("(HELLO)%s(%s)%s(%s)%s{0,1}", RX_ESP, RX_DOMAINE, RX_ESP, RX_RANDOM22, RX_CRLF);
-    private final String RX_CONNECT = String.format("(CONNECT)%s(%s)%s{0,1}", RX_ESP, RX_NOM_UTILISATEUR, RX_CRLF);
-    private final String RX_PARAM = String.format("(PARAM)%s(%s)%s(%s)%s{0,1}", RX_ESP, RX_ROUND, RX_ESP, RX_SALT, RX_CRLF);
-    private final String RX_CONFIRM = String.format("(CONFIRM)%s(%s)%s{0,1}", RX_ESP, RX_SHA3_HEX, RX_CRLF);
-    private final String RX_REGISTER = String.format("(REGISTER)%s(%s)%s(%s)%s(%s)%s{0,1}", RX_ESP, RX_NOM_UTILISATEUR, RX_ESP, RX_SALT_SIZE, RX_ESP, RX_BCRYPT_HASH, RX_CRLF);
-    private final String RX_FOLLOW = String.format("(FOLLOW)%s(%s|%s)%s{0,1}", RX_ESP, RX_NOM_DOMAINE, RX_TAG_DOMAINE, RX_CRLF);
-    private final String RX_MSG = String.format("(MSG)%s(%s)%s{0,1}", RX_ESP, RX_MESSAGE, RX_CRLF);
-    private final String RX_MSGS = String.format("(MSGS)%s(%s)%s(%s)%s{0,1}", RX_ESP, RX_NOM_DOMAINE, RX_ESP, RX_MESSAGE, RX_CRLF);
-    private final String RX_OK = String.format("(\\+OK)%s(%s)%s{0,1}", RX_ESP, RX_MESSAGE, RX_CRLF);
-    private final String RX_ERROR = String.format("(\\-ERR)%s(%s)%s{0,1}", RX_ESP, RX_MESSAGE, RX_CRLF);
-    private final String RX_DISCONNECT = String.format("(DISCONNECT)%s{0,1}", RX_CRLF);
+    private final String RX_HELLO = String.format("(HELLO)%s(%s)%s(%s)(%s){0,1}", RX_ESP, RX_DOMAINE, RX_ESP, RX_RANDOM22, RX_CRLF);
+    private final String RX_CONNECT = String.format("(CONNECT)%s(%s)(%s){0,1}", RX_ESP, RX_NOM_UTILISATEUR, RX_CRLF);
+    private final String RX_PARAM = String.format("(PARAM)%s(%s)%s(%s)(%s){0,1}", RX_ESP, RX_ROUND, RX_ESP, RX_SALT, RX_CRLF);
+    private final String RX_CONFIRM = String.format("(CONFIRM)%s(%s)(%s){0,1}", RX_ESP, RX_SHA3_HEX, RX_CRLF);
+    private final String RX_REGISTER = String.format("(REGISTER)%s(%s)%s(%s)%s(%s)(%s){0,1}", RX_ESP, RX_NOM_UTILISATEUR, RX_ESP, RX_SALT_SIZE, RX_ESP, RX_BCRYPT_HASH, RX_CRLF);
+    private final String RX_FOLLOW = String.format("(FOLLOW)%s(%s|%s)(%s){0,1}", RX_ESP, RX_NOM_DOMAINE, RX_TAG_DOMAINE, RX_CRLF);
+    private final String RX_MSG = String.format("(MSG)%s(%s)(%s){0,1}", RX_ESP, RX_MESSAGE, RX_CRLF);
+    private final String RX_MSGS = String.format("(MSGS)%s(%s)%s(%s)(%s){0,1}", RX_ESP, RX_NOM_DOMAINE, RX_ESP, RX_MESSAGE, RX_CRLF);
+    private final String RX_OK = String.format("(\\+OK)%s(%s)(%s){0,1}", RX_ESP, RX_MESSAGE, RX_CRLF);
+    private final String RX_ERROR = String.format("(\\-ERR)%s(%s)(%s){0,1}", RX_ESP, RX_MESSAGE, RX_CRLF);
+    private final String RX_DISCONNECT = String.format("(DISCONNECT)(%s){0,1}", RX_CRLF);
 
     // Echanges multicast entre Murmur Server et Murmur Relay :
-    private final String RX_ECHO = String.format("(ECHO)%s(%s)%s(%s)%s{0,1}", RX_ESP, RX_PORT, RX_ESP, RX_DOMAINE, RX_CRLF);
+    private final String RX_ECHO = String.format("(ECHO)%s(%s)%s(%s)(%s){0,1}", RX_ESP, RX_PORT, RX_ESP, RX_DOMAINE, RX_CRLF);
 
     // Echanges unicast entre Murmur Server et Murmur Relay :
-    private final String RX_SEND = String.format("(SEND)%s(%s)%s(%s)%s(%s|%s)%s(%s)%s{0,1}", RX_ESP, RX_ID_DOMAINE, RX_ESP, RX_NOM_DOMAINE, RX_ESP, RX_NOM_DOMAINE, RX_TAG_DOMAINE, RX_ESP, RX_MESSAGE_INTERNE, RX_CRLF);
+    private final String RX_SEND = String.format("(SEND)%s(%s)%s(%s)%s(%s|%s)%s(%s)(%s){0,1}", RX_ESP, RX_ID_DOMAINE, RX_ESP, RX_NOM_DOMAINE, RX_ESP, RX_NOM_DOMAINE, RX_TAG_DOMAINE, RX_ESP, RX_MESSAGE_INTERNE, RX_CRLF);
 
     // Messages pour la construction :
     private final String HELLO = "HELLO <domaine> <random22>\r\n";
@@ -73,7 +73,7 @@ public class Protocol {
         String connectMessage = CONNECT.replaceAll("<nom-utilisateur>",username);
         if(connectMessage.matches(RX_CONNECT)) {
             return connectMessage;
-         } else {
+        } else {
             throw new IllegalArgumentException("Please provide correct argument for the construction of the CONNECT message");
         }
     }
