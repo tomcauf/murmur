@@ -5,7 +5,6 @@
   "multicastPort": 23001,
   "unicastPort": 12020,
   "relayPort": 23847,
-  "networkInterface": "eth12",
   "base64AES": "P3FXqAUgfhy5cTjYdWlPQBJ/d6fdpbR88YsDPWPbo14\u003d",
   "tls": true,
   "users": [
