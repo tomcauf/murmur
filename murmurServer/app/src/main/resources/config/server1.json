@@ -2,7 +2,7 @@
   "currentDomain": "server1.godswila.guru",
   "saltSizeInBytes": 16,
   "multicastAddress": "224.1.1.255",
-  "multicastPort": 23845,
+  "multicastPort": 23001,
   "unicastPort": 12020,
   "relayPort": 23847,
   "networkInterface": "eth12",
