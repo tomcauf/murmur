@@ -3,38 +3,21 @@
  */
 package org.murmurRelay;
 
+import org.murmurRelay.factory.RelayManagerFactory;
+import org.murmurRelay.grammar.Protocol;
+import org.murmurRelay.handler.RelayManager;
+import org.murmurRelay.infrastructures.JsonRepository;
+import org.murmurRelay.repositories.IRelayRepository;
 import org.murmurRelay.utils.NetChooser;
-
-import java.net.*;
-import java.nio.charset.StandardCharsets;
 
 public class App {
     public static void main(String[] args) {
-        NetChooser netChooser = new NetChooser();
-        NetworkInterface selectedInterface = netChooser.getSelectedInterface();
-
         try {
-            String msg = "Hello";
-            InetAddress mcastaddr = InetAddress.getByName("224.1.1.255");
-            InetSocketAddress group = new InetSocketAddress(mcastaddr, 23001);
-            MulticastSocket s = new MulticastSocket(23001);
-
-            s.joinGroup(new InetSocketAddress(mcastaddr, 0), selectedInterface);
-            byte[] msgBytes = msg.getBytes(StandardCharsets.UTF_8);
-            DatagramPacket hi = new DatagramPacket(msgBytes, msgBytes.length, group);
-
-            while(true) {
-                s.send(hi);
-                Thread.sleep(15000);
-            }
-            // get their responses!
-            /*byte[] buf = new byte[1000];
-            DatagramPacket recv = new DatagramPacket(buf, buf.length);
-            s.receive(recv);
-            // OK, I'm done talking - leave the group...
-            s.leaveGroup(group, selectedInterface);*/
+            RelayManagerFactory relayFactory = new RelayManagerFactory(new JsonRepository(),new NetChooser(),new Protocol());
+            RelayManager relayManager = relayFactory.createAndGetRelayManager();
+            relayManager.startRelay();
         } catch(Exception e) {
-            System.out.println("Erreur : " + e.getMessage());
+            System.out.println(e.getMessage());
         }
     }
 }
