@@ -7,7 +7,7 @@ public class Protocol {
     private final String RX_LETTRE = "[a-zA-Z]";
     private final String RX_LETTRE_CHIFFRE = String.format("[%s%s]", RX_LETTRE, RX_CHIFFRE);
     private final String RX_CARACTERE_IMPRIMABLE = "[\\x20-\\xff]";
-    private final String RX_CRLF = "\\x0d\\x0a"; // OU => \\r\\n
+    private final String RX_CRLF = "[\\x0d\\x0a]"; // OU => [\\r\\n]
     private final String RX_SYMBOLE = "[\\x21-\\x2f\\x3a-\\x40\\x5b-\\x60]";
     private final String RX_ESP = "\\x20";
     private final String RX_DOMAINE = String.format("[%s%s]{5,200}", RX_LETTRE_CHIFFRE,"\\x2e");
