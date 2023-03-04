@@ -7,7 +7,6 @@ import org.murmurRelay.factory.RelayManagerFactory;
 import org.murmurRelay.grammar.Protocol;
 import org.murmurRelay.handler.RelayManager;
 import org.murmurRelay.infrastructures.JsonRepository;
-import org.murmurRelay.repositories.IRelayRepository;
 import org.murmurRelay.utils.NetChooser;
 
 public class App {

@@ -354,4 +354,13 @@ public class Protocol {
         }
         return new String[]{"-ERR","This SEND message is not correctly formatted"};
     }
+
+    public String extractDomain(String tagOrDomainName) {
+        if(tagOrDomainName != null) {
+            if(tagOrDomainName.matches(RX_TAG_DOMAINE) || tagOrDomainName.matches(RX_NOM_DOMAINE)) {
+                return tagOrDomainName.substring(tagOrDomainName.indexOf("@") + 1);
+            }
+        }
+        return null;
+    }
 }
