@@ -57,17 +57,24 @@ public class ClientServerRunnable implements Runnable{
     private String getServerMessage() {
         Socket socket = null;
         BufferedReader bufferedReader = null;
+        String messageReceived;
 
         try {
             socket = new Socket(domain, port);
-
+            Thread.sleep(3000);
             bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            return bufferedReader.readLine();
+            if(bufferedReader.ready() && (messageReceived = bufferedReader.readLine()) != null) {
+                return messageReceived;
+            } else {
+                return null;
+            }
         } catch(ConnectException e) {
             System.out.printf("The server with the domain name: %s is not available on port %d\n",domain,port);
         } catch (IOException e) {
             System.out.printf("Error while contacting the server : %s on port %d\n",domain,port);
+        } catch (InterruptedException e) {
+            System.out.println("Error while interrupting thread");
         } finally {
             try {
                 if(socket != null && bufferedReader != null) {
@@ -92,13 +99,19 @@ public class ClientServerRunnable implements Runnable{
 
         try {
             if(port != -1) {
-                socket = new Socket(domain, relayManager.getUnicastDestinationPort(domain));
+                while(true) {
+                    if(relayManager.checkIfServerIsAvailable(domain)) {
+                        relayManager.setDomainNotAvailable(domain);
+                        socket = new Socket(domain, relayManager.getUnicastDestinationPort(domain));
 
-                out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), Charset.forName("UTF-8")), true);
+                        out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), Charset.forName("UTF-8")), true);
 
-                out.print(messageToSend);
-                out.flush();
-                System.out.println("Message envoyé : " + messageToSend);
+                        out.print(messageToSend);
+                        out.flush();
+                        System.out.println("Message envoyé : " + messageToSend);
+                        break;
+                    }
+                }
             }
         } catch(ConnectException e) {
             System.out.printf("The server with the domain name: %s is not available on port %d\n",domain,port);

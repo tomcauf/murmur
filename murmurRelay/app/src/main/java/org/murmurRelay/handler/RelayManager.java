@@ -69,7 +69,7 @@ public class RelayManager {
             String domain = checkMessage[2];
             if((serverAESKey = getServerKey(domain)) != null && checkIfServerIsAvailable(domain)) {
                 addUnicastServer(domain,port);
-                serversNotAvailable.add(domain);
+                setDomainNotAvailable(domain);
                 (new Thread(new ClientServerRunnable(this, Integer.parseInt(port),domain,serverAESKey))).start();
             }
         }
@@ -105,21 +105,17 @@ public class RelayManager {
         return null;
     }
 
-    private boolean checkIfServerIsKnown(String domain) {
-        for(var server : getRelayServerList()) {
-            if(server.getDomain().equals(domain)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    private boolean checkIfServerIsAvailable(String domain) {
+    public boolean checkIfServerIsAvailable(String domain) {
         return !serversNotAvailable.contains(domain);
     }
 
     public void setDomainAvailable(String domain) {
-            serversNotAvailable.remove(domain);
+        serversNotAvailable.remove(domain);
+    }
+
+    public void setDomainNotAvailable(String domain) {
+        if(!serversNotAvailable.contains(domain)) {
+            serversNotAvailable.add(domain);
+        }
     }
 }
