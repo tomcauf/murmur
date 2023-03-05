@@ -2,6 +2,7 @@ package org.helmo.reseau.servers;
 
 import org.helmo.reseau.clients.ClientRunnable;
 import org.helmo.reseau.clients.Entity;
+import org.helmo.reseau.clients.RelayRunnable;
 import org.helmo.reseau.domains.Server;
 import org.helmo.reseau.domains.User;
 import org.helmo.reseau.grammar.Protocol;
@@ -38,8 +39,12 @@ public class ServerManager {
         try {
             SocketManager socketManager = new SocketManager(server.getUnicastPort(), tlsSocketFactory);
             socketManager.start();
+
             new Thread(taskExecutor).start();
             while (!stop) {
+                RelayRunnable relayRunnable = new RelayRunnable(server.getDomain(),server.getMulticastPort(),server.getMulticastAddress(),server.getRelayPort());
+                Thread networkSelectorThread = new Thread(relayRunnable);
+                networkSelectorThread.start();
                 SSLSocket clientSocket = socketManager.acceptClient();
                 System.out.println("[+] New client connected");
                 ClientRunnable client = new ClientRunnable(clientSocket, this);
