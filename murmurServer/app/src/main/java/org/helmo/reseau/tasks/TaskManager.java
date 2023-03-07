@@ -1,81 +1,53 @@
 package org.helmo.reseau.tasks;
 
-import org.helmo.reseau.clients.Entity;
+import org.helmo.reseau.clients.ClientRunnable;
 import org.helmo.reseau.domains.StatusOfTask;
 import org.helmo.reseau.domains.Task;
-import org.helmo.reseau.grammar.Protocol;
+import org.helmo.reseau.servers.ServerManager;
 
 import java.util.*;
 
-public class TaskManager{
+public class TaskManager {
+    private Queue<Task> tasks;
+    private ServerManager serverManager;
     private int idCounter;
-    private Protocol protocol;
-    Queue<Task> taskList;
-    public TaskManager(Protocol protocol){
-        this.idCounter = 0;
-        this.protocol = protocol;
-        this.taskList = new LinkedList<>();
 
+    public TaskManager() {
+        this.tasks = new LinkedList<>();
+        this.idCounter = 0;
     }
-    /**
-     * REGISTER :
-     * * Destinataire : l'utilisateur (je renvoie un +OK ou -ERR)
-     * * Source : l'utilisateur
-     *
-     * CONNECT :
-     * * Destinataire : l'utilisateur (je renvoie un PARAM ou -ERR)
-     * * Source : l'utilisateur
-     *
-     * CONFIRM :
-     * * Destinataire : l'utilisateur (je renvoie un +OK ou -ERR)
-     * * Source : l'utilisateur
-     *
-     * FOLLOW :
-     * * Destinataire : l'utilisateur (je renvoie un +OK ou -ERR)
-     * * Source : l'utilisateur
-     *
-     * MSG :
-     * * Destinataire : les utilisateurs qui suivent l'auteur ou si l'auteur utilise un #,
-     *                  les utilisateurs qui suivent le # recevront le message
-     * * Source : l'utilisateur
-     *
-     * DISCONNECT :
-     * * Destinataire : l'utilisateur (je renvoie un +OK ou -ERR)
-     * * Source : l'utilisateur
-     *
-     * HELLO :
-     * * Destinataire : l'utilisateur
-     * * Source : le serveur
-     *
-     *
-     * Je sais directement le destinataire :
-     * * REGISTER
-     * * CONNECT
-     * * CONFIRM
-     * * FOLLOW
-     * * DISCONNECT
-     * * HELLO
-     * * -ERR (vu que je renvoie à l'auteur, une erreur)
-     *
-     * Je ne sais pas le destinataire :
-     * * MSG
-     */
-    public void createTask(String request, Entity author) {
-        String[] value = protocol.verifyMessage(request);
-        int id = idCounter++;
-        String type = value[0];
-        //System.out.println("TaskManager : createTask: " + type);
-        List<String> destinataire = new ArrayList<>();
-        if (value[0].equals("MSG")) {
-            destinataire.addAll(author.getFollowers());
+
+    public void createTask(ClientRunnable clientRunnable, String[] message) {
+        Set<String> destinataires = new HashSet<>();
+        if (message[0].equals("MSG")) {
+            destinataires.addAll(clientRunnable.getFollowers());
+            String username = clientRunnable.getUsername();
+            for (String tag : retrieveTags(message[1])) {
+                List<String> followers = serverManager.getFollowers(tag);
+                if (followers.contains(username)) {
+                    followers.remove(username);
+                    destinataires.addAll(followers);
+                }
+            }
         } else {
-            destinataire.add(author.getName());
+            destinataires.add(clientRunnable.getUsername());
         }
-        Task task = new Task(id, type, author, destinataire, value, StatusOfTask.WAITING);
-        taskList.add(task);
+        Task task = new Task(idCounter++, message[0], clientRunnable, new ArrayList<>(destinataires), message, StatusOfTask.WAITING);
+        tasks.add(task);
     }
 
     public Task getNextTask() {
-        return taskList.poll();
+        return tasks.poll();
+    }
+
+    private List<String> retrieveTags(String message) {
+        String[] words = message.split(" ");
+        List<String> tags = new ArrayList<>();
+        for (String word : words) {
+            if (word.startsWith("#")) {
+                tags.add(word);
+            }
+        }
+        return tags;
     }
 }

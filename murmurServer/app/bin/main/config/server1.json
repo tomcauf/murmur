@@ -2,13 +2,21 @@
   "currentDomain": "server1.godswila.guru",
   "saltSizeInBytes": 16,
   "multicastAddress": "224.1.1.255",
-  "multicastPort": 23845,
+  "multicastPort": 23001,
   "unicastPort": 12020,
-  "relayPort": 23847,
-  "networkInterface": "eth12",
+  "relayPort": 23002,
   "base64AES": "P3FXqAUgfhy5cTjYdWlPQBJ/d6fdpbR88YsDPWPbo14\u003d",
   "tls": true,
   "users": [
+    {
+      "login": "godswila",
+      "bcryptHash": "MUZoMt3FMU3zqcznZ05cEHWH32bGvv.",
+      "bcryptRound": 14,
+      "bcryptSalt": "e7uCIU8uR3Uy/yDa2kzkf.",
+      "followers": [],
+      "userTags": [],
+      "lockoutCounter": 0
+    }
   ],
   "tags": []
 }

@@ -91,4 +91,8 @@ public class User {
     public boolean haveTag(String tagName) {
         return this.userTags.contains(tagName);
     }
+
+    public boolean isFollowed(String follow) {
+        return this.followers.contains(follow);
+    }
 }
