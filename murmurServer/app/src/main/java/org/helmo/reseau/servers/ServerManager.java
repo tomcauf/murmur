@@ -2,6 +2,8 @@ package org.helmo.reseau.servers;
 
 import org.helmo.reseau.repositories.IServerRepositories;
 import org.helmo.reseau.clients.ClientRunnable;
+import org.helmo.reseau.clients.Entity;
+import org.helmo.reseau.clients.RelayRunnable;
 import org.helmo.reseau.domains.Server;
 import org.helmo.reseau.domains.User;
 import org.helmo.reseau.grammar.Protocol;
@@ -40,7 +42,10 @@ public class ServerManager {
         try(SSLServerSocket serverSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(server.getUnicastPort(), 100, InetAddress.getByName(server.getDomain()))) {
             System.out.println("[*] Server started at " + server.getDomain() + ":" + server.getUnicastPort());
             new Thread(new TaskExecutor(taskManager, this, protocol)).start();
-
+            //TODO: Voir avec Ahmed si c'est bien ça ?
+            RelayRunnable relayRunnable = new RelayRunnable(server.getDomain(),server.getMulticastPort(),server.getMulticastAddress(),server.getRelayPort());
+            Thread networkSelectorThread = new Thread(relayRunnable);
+            networkSelectorThread.start();
             while (true) {
                 SSLSocket clientSocket = (SSLSocket) serverSocket.accept();
                 System.out.println("[+] New client connected");

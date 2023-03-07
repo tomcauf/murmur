@@ -46,7 +46,6 @@ public class Protocol {
 
     // Echanges unicast entre Murmur Server et Murmur Relay :
     private final String RX_SEND = String.format("(SEND)%s(%s)%s(%s)%s(%s|%s)%s(%s)(%s){0,1}", RX_ESP, RX_ID_DOMAINE, RX_ESP, RX_NOM_DOMAINE, RX_ESP, RX_NOM_DOMAINE, RX_TAG_DOMAINE, RX_ESP, RX_MESSAGE_INTERNE, RX_CRLF);
-
     // Messages pour la construction :
     private final String HELLO = "HELLO <domaine> <random22>";
     private final String CONNECT = "CONNECT <nom-utilisateur>";
