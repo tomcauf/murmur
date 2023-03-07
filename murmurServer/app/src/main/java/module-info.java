@@ -1,4 +1,4 @@
-module org.helmo {
+module org.helmo.reseau {
     requires com.google.gson;
 
     opens org.helmo.reseau.infrastructures to com.google.gson;

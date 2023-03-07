@@ -8,9 +8,8 @@ import javax.net.ssl.SSLSocket;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.List;
 
 public class ClientRunnable implements Runnable, Closeable {
@@ -37,7 +36,7 @@ public class ClientRunnable implements Runnable, Closeable {
             randomString = randomString(22);
             sendMessage(protocol.buildHello(serverManager.getServerDomain(), randomString));
         } catch (IOException e) {
-            System.out.println("[!] Error ClientRunnable: " + e.getMessage());
+            System.out.println("[!] Error ClientRunnable: " + Arrays.toString(e.getStackTrace()));
         }
     }
 
@@ -59,7 +58,11 @@ public class ClientRunnable implements Runnable, Closeable {
     private void handleMessage(String msg) {
         System.out.println("[ClientRunnable] handleMessage: " + msg);
         String[] message = protocol.verifyMessage(msg);
-        if (message[0].equals("-ERR")) {
+        //TODO: Voir avec le prof si je peux le mettre directement ici
+        if(message[0].equals("DISCONNECT")) {
+            sendMessage(protocol.buildOk("Disconnecting"));
+            serverManager.closeClient(this);
+        } else if (message[0].equals("-ERR") && !isAuthentified) {
             sendMessage(protocol.buildError(message[1]));
         } else if (isAuthentified) {
             serverManager.createTask(this, message);
@@ -190,6 +193,7 @@ public class ClientRunnable implements Runnable, Closeable {
     public void close() {
         try {
             isOnServer = false;
+            //TODO: Demander si je dois faire le in.close() et out.close()
             //in.close();
             //out.close();
             clientSocket.close();
