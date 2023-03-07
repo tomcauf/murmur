@@ -58,6 +58,7 @@ public class TaskExecutor implements Runnable{
             if (domain.equals(serverManager.getServerDomain())) {
                 if(!source.isFollowed(follow)){
                     serverManager.addTag(name);
+                    serverManager.addFollowedTag(source.getUsername(), name);
                     source.addFollowedTag(follow);
                     serverManager.saveServer();
                     source.sendMessage(protocol.buildOk("You are now following " + follow));

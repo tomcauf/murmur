@@ -10,13 +10,30 @@
   "users": [
     {
       "login": "godswila",
-      "bcryptHash": "MUZoMt3FMU3zqcznZ05cEHWH32bGvv.",
+      "bcryptHash": "Ir5nbW8BXA0z3kln.hgQh6LeK02I6YK",
       "bcryptRound": 14,
-      "bcryptSalt": "e7uCIU8uR3Uy/yDa2kzkf.",
+      "bcryptSalt": "EJ/eksMoKgWDM9SX3qZjuO",
+      "followers": ["Mouchakk@server1.godswila.guru"],
+      "userTags": ["#tagged@server1.godswila.guru"],
+      "lockoutCounter": 0
+    },
+    {
+      "login": "Mouchakk",
+      "bcryptHash": "1m/dZur4hgTOFXe0N5Qpa/GX5v49nBS",
+      "bcryptRound": 14,
+      "bcryptSalt": "uJ/0rrGJ8WOTbnFLYOrQC.",
       "followers": [],
-      "userTags": [],
+      "userTags": ["#tagged@server1.godswila.guru"],
       "lockoutCounter": 0
     }
   ],
-  "tags": []
+  "tags": [
+    {
+      "name": "#tagged",
+      "users": [
+        "godswila@server1.godswila.guru",
+        "Mouchakk@server1.godswila.guru"
+      ]
+    }
+  ]
 }

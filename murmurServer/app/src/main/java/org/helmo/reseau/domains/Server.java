@@ -87,7 +87,17 @@ public class Server {
     }
 
     public List<String> getFollowers(String tag) {
-        return this.tagsList.stream().filter(t -> t.getName().equals(tag)).findFirst().map(Tag::getUsers).orElse(new ArrayList<>());
+        for (Tag t : this.tagsList) {
+            if (t.getName().equals(tag)) {
+                System.out.println("[+] Followers of " + tag + " : " + t.getUsers());
+                return t.getUsers();
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    public void addFollowedTag(String follow, String tag) {
+        this.tagsList.stream().filter(t -> t.getName().equals(tag)).findFirst().ifPresent(t -> t.addUser(follow));
     }
 
 }
