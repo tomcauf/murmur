@@ -44,7 +44,6 @@ public class TaskExecutor implements Runnable{
         switch (currentTask.getType()) {
             case "FOLLOW" -> follow(currentTask);
             case "MSG" -> msg(currentTask);
-            case "DISCONNECT" -> disconnect(currentTask);
             default -> System.out.println("[!] TaskExecutor.runTask: Unknown task type");
         }
 
@@ -59,7 +58,7 @@ public class TaskExecutor implements Runnable{
             if (domain.equals(serverManager.getServerDomain())) {
                 if(!source.isFollowed(follow)){
                     serverManager.addTag(name);
-                    serverManager.addFollowedTag(source.getUsername(), name);
+                    serverManager.addFollowedTag(source.getUsername() + "@" + serverManager.getServerDomain(), name);
                     source.addFollowedTag(follow);
                     serverManager.saveServer();
                     source.sendMessage(protocol.buildOk("You are now following " + follow));
@@ -115,7 +114,6 @@ public class TaskExecutor implements Runnable{
         destinataires.addAll(clientRunnable.getFollowers());
         String username = clientRunnable.getUsername();
         for (String tag : retrieveTags(currentTask.getCommand()[1])) {
-            System.out.println("tag: " + tag);
             List<String> followers = serverManager.getFollowers(tag);
             //TODO: Doit changer
             if (followers.contains(username + "@" + serverManager.getServerDomain())) {
@@ -126,10 +124,6 @@ public class TaskExecutor implements Runnable{
         return new ArrayList<>(destinataires);
     }
 
-    private void disconnect(Task currentTask) {
-        currentTask.getSource().sendMessage(protocol.buildOk("Disconnecting"));
-        serverManager.closeClient(currentTask.getSource());
-    }
     private List<String> retrieveTags(String message) {
         String[] words = message.split(" ");
         List<String> tags = new ArrayList<>();
@@ -140,4 +134,5 @@ public class TaskExecutor implements Runnable{
         }
         return tags;
     }
+
 }

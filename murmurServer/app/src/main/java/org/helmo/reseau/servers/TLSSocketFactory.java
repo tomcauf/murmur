@@ -1,9 +1,7 @@
 package org.helmo.reseau.servers;
 
 import javax.net.ssl.*;
-import java.io.FileInputStream;
 import java.nio.file.Paths;
-import java.security.KeyStore;
 
 public class TLSSocketFactory {
     private final String certificatePath;

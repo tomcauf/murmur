@@ -1,10 +1,8 @@
 package org.helmo.reseau.tasks;
 
 import org.helmo.reseau.clients.ClientRunnable;
-import org.helmo.reseau.domains.Server;
 import org.helmo.reseau.domains.StatusOfTask;
 import org.helmo.reseau.domains.Task;
-import org.helmo.reseau.servers.ServerManager;
 
 import java.util.*;
 

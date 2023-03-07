@@ -2,8 +2,6 @@ package org.helmo.reseau.domains;
 
 import org.helmo.reseau.clients.ClientRunnable;
 
-import java.util.List;
-
 public class Task {
     private int id;
     private String type;

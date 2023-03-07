@@ -1,6 +1,5 @@
 package org.helmo.reseau;
 
-import org.helmo.reseau.clients.RelayRunnable;
 import org.helmo.reseau.servers.ServerFactory;
 
 public class App {

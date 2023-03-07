@@ -1,6 +1,5 @@
 package org.helmo.reseau.domains;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Tag {

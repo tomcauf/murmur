@@ -8,10 +8,8 @@ import javax.net.ssl.SSLSocket;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 public class ClientRunnable implements Runnable, Closeable {
@@ -62,6 +60,7 @@ public class ClientRunnable implements Runnable, Closeable {
         String[] message = protocol.verifyMessage(msg);
         //TODO: Voir avec le prof si je peux le mettre directement ici
         if(message[0].equals("DISCONNECT")) {
+            sendMessage(protocol.buildOk("Disconnecting"));
             serverManager.closeClient(this);
         } else if (message[0].equals("-ERR") && !isAuthentified) {
             sendMessage(protocol.buildError(message[1]));
@@ -194,6 +193,7 @@ public class ClientRunnable implements Runnable, Closeable {
     public void close() {
         try {
             isOnServer = false;
+            //TODO: Demander si je dois faire le in.close() et out.close()
             //in.close();
             //out.close();
             clientSocket.close();
