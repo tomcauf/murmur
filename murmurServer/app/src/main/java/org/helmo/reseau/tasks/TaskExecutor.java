@@ -7,10 +7,11 @@ import org.helmo.reseau.domains.User;
 import org.helmo.reseau.grammar.Protocol;
 import org.helmo.reseau.servers.ServerManager;
 
+
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 public class TaskExecutor implements Runnable{
     private TaskManager taskManager;
@@ -24,17 +25,17 @@ public class TaskExecutor implements Runnable{
 
     @Override
     public void run() {
-        while (true){
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-               System.out.println("[!] Error TaskExecutor.run: " + e.getMessage());
+            while (true){
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    System.out.println("[!] Error TaskExecutor.run: " + e.getMessage());
+                }
+                Task currentTask = taskManager.getNextTask();
+                if(currentTask != null){
+                    runTask(currentTask);
+                }
             }
-            Task currentTask = taskManager.getNextTask();
-            if(currentTask != null){
-                runTask(currentTask);
-            }
-        }
     }
 
     private void runTask(Task currentTask) {
@@ -90,7 +91,7 @@ public class TaskExecutor implements Runnable{
         //Récupérer la liste de destinataires et envoyer le message
         String[] command = currentTask.getCommand();
         String message = command[1];
-        List<String> destinataires = currentTask.getDestination();
+        List<String> destinataires = getDestination(currentTask);
         ClientRunnable source = currentTask.getSource();
         String serverDomain = serverManager.getServerDomain();
         //TODO: Doit changer pour envoyer au Relay les MSG en "mieux".
@@ -108,11 +109,35 @@ public class TaskExecutor implements Runnable{
 
     }
 
+    private List<String> getDestination(Task currentTask) {
+        Set<String> destinataires = new HashSet<>();
+        ClientRunnable clientRunnable = currentTask.getSource();
+        destinataires.addAll(clientRunnable.getFollowers());
+        String username = clientRunnable.getUsername();
+        for (String tag : retrieveTags(currentTask.getCommand()[1])) {
+            System.out.println("tag: " + tag);
+            List<String> followers = serverManager.getFollowers(tag);
+            //TODO: Doit changer
+            if (followers.contains(username + "@" + serverManager.getServerDomain())) {
+                destinataires.addAll(followers);
+            }
+        }
+        destinataires.remove(username + "@" + serverManager.getServerDomain());
+        return new ArrayList<>(destinataires);
+    }
+
     private void disconnect(Task currentTask) {
         currentTask.getSource().sendMessage(protocol.buildOk("Disconnecting"));
         serverManager.closeClient(currentTask.getSource());
     }
-
-
-
+    private List<String> retrieveTags(String message) {
+        String[] words = message.split(" ");
+        List<String> tags = new ArrayList<>();
+        for (String word : words) {
+            if (word.startsWith("#")) {
+                tags.add(word);
+            }
+        }
+        return tags;
+    }
 }

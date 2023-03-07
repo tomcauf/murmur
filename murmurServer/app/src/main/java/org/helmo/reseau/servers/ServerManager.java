@@ -31,7 +31,6 @@ public class ServerManager {
         this.server = repositories.getServer();
         this.tlsSocketFactory = tlsSocketFactory;
         this.taskManager = taskManager;
-        taskManager.setServerManager(this);
         this.clientList = Collections.synchronizedList(new ArrayList<>());
     }
 
