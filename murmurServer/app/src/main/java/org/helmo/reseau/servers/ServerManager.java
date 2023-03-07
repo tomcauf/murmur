@@ -1,127 +1,109 @@
 package org.helmo.reseau.servers;
 
+import org.helmo.reseau.repositories.IServerRepositories;
 import org.helmo.reseau.clients.ClientRunnable;
 import org.helmo.reseau.clients.Entity;
+import org.helmo.reseau.clients.RelayRunnable;
 import org.helmo.reseau.domains.Server;
 import org.helmo.reseau.domains.User;
 import org.helmo.reseau.grammar.Protocol;
-import org.helmo.reseau.repositories.IServerRepositories;
 import org.helmo.reseau.tasks.TaskExecutor;
 import org.helmo.reseau.tasks.TaskManager;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
-import java.util.*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class ServerManager {
-    private final List<ClientRunnable> clientList;
-    private final IServerRepositories repositories;
-    private final Server server;
-    private final MessageDispatch messageDispatch;
-    private final TLSSocketFactory tlsSocketFactory;
+    private IServerRepositories repositories;
+    private TLSSocketFactory tlsSocketFactory;
     private TaskManager taskManager;
-    private TaskExecutor taskExecutor;
-    private Protocol protocol;
-    private boolean stop = false;
+    private List<ClientRunnable> clientList;
+    private Server server;
 
-    public ServerManager(IServerRepositories repositories, TLSSocketFactory tlsSocketFactory) {
+    public ServerManager(IServerRepositories repositories, TLSSocketFactory tlsSocketFactory, TaskManager taskManager){
         this.repositories = repositories;
         this.server = repositories.getServer();
         this.tlsSocketFactory = tlsSocketFactory;
+        this.taskManager = taskManager;
         this.clientList = Collections.synchronizedList(new ArrayList<>());
-        this.messageDispatch = new MessageDispatch();
-        this.protocol = new Protocol();
-        this.taskManager = new TaskManager(protocol);
-        this.taskExecutor = new TaskExecutor(taskManager, repositories, this, messageDispatch, protocol);
     }
 
     public void startServer() {
-        try {
-            SocketManager socketManager = new SocketManager(server.getUnicastPort(), tlsSocketFactory);
-            socketManager.start();
-            new Thread(taskExecutor).start();
-            while (!stop) {
-                SSLSocket clientSocket = socketManager.acceptClient();
+        SSLServerSocketFactory sslServerSocketFactory = tlsSocketFactory.getServerSocketFactory();
+        Protocol protocol = new Protocol();
+
+        try(SSLServerSocket serverSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(server.getUnicastPort(), 100, InetAddress.getByName(server.getDomain()))) {
+            System.out.println("[*] Server started at " + server.getDomain() + ":" + server.getUnicastPort());
+            new Thread(new TaskExecutor(taskManager, this, protocol)).start();
+            //TODO: Voir avec Ahmed si c'est bien ça ?
+            RelayRunnable relayRunnable = new RelayRunnable(server.getDomain(),server.getMulticastPort(),server.getMulticastAddress(),server.getRelayPort());
+            Thread networkSelectorThread = new Thread(relayRunnable);
+            networkSelectorThread.start();
+            while (true) {
+                SSLSocket clientSocket = (SSLSocket) serverSocket.accept();
                 System.out.println("[+] New client connected");
-                ClientRunnable client = new ClientRunnable(clientSocket, this);
+
+                ClientRunnable client = new ClientRunnable(clientSocket, this, protocol);
                 clientList.add(client);
                 (new Thread(client)).start();
             }
-        } catch (Exception e) {
-            System.out.println("[!] Error ServerManager.startServer: " + e.getMessage());
+
+        } catch (IOException e){
+            System.out.println("[!] Error 1ServerManager.startServer: " + e.getMessage());
+        } catch (Exception e){
+            System.out.println("[!] Error 2ServerManager.startServer: " + Arrays.toString(e.getStackTrace()));
         }
     }
-
-    //********** TASKS **********//
-    public void createTask(String requete, Entity author){
-        taskManager.createTask(requete, author);
+    public void closeClient(ClientRunnable client){
+        client.close();
+        clientList.remove(client);
     }
-    //********** END TASKS **********//
-
-    //TODO: Vérifier si ça doit disparaitre (toute celle qui sont en dessous du TODO)
-    public void broadcastToAllClients(ClientRunnable client, String message) {
-        messageDispatch.dispatchMessage(clientList, client, message);
+    public boolean registerUser(User user) {
+        if (server.hasUser(user)) {
+            return false;
+        } else {
+            server.addUser(user);
+            repositories.writeServer(server);
+            return true;
+        }
     }
-
-    public void addUser(User user) {
-        server.addUser(user);
-    }
-
-    public boolean doYouKnowThisUser(User user) {
-        return server.doYouKnowThisUser(user);
-    }
-
-    public String getDomain() {
-        return server.getDomain();
-    }
-
-    public User getUserByName(String name) {
-        return server.getUserByName(name);
-    }
-
-    public void addTagIfNotExist(String tagName) {
-        server.addTagIfNotExist(tagName);
-    }
-
-    public void addUserToTag(String tagName, String user) {
-        server.addUserToTag(tagName, user);
-    }
-
     public void saveServer() {
         repositories.writeServer(server);
     }
+    public User getUser(String name) {
+        return server.getUser(name);
+    }
 
-    public Entity getClient(String entity) {
+    public String getServerDomain() {
+        return server.getDomain();
+    }
+
+    public void createTask(ClientRunnable clientRunnable, String[] message) {
+        System.out.println("[+] Creating task");
+        taskManager.createTask(clientRunnable, message);
+    }
+    public List<String> getFollowers(String tag) {
+        return server.getFollowers(tag);
+    }
+
+    public void addTag(String name) {
+        if (!server.hasTag(name))
+            server.addTag(name);
+    }
+
+    public ClientRunnable getClient(String name) {
         for (ClientRunnable client : clientList) {
-            if (client.getName().equals(entity)) {
+            if (client.getUsername().equals(name)) {
                 return client;
             }
         }
         return null;
-    }
-
-    public void createHelloTask(ClientRunnable clientRunnable, String randomString) {
-        try {
-            String helloMessage = protocol.buildHello(server.getDomain(),randomString);
-            taskManager.createTask(helloMessage, clientRunnable);
-        }catch (Exception e){
-            System.out.println("[!] Error ServerManager.createHelloTask: " + e.getMessage());
-        }
-    }
-    public void createDisconnectTask(ClientRunnable clientRunnable) {
-        try {
-            String disconnectMessage = protocol.buildDisconnect();
-            taskManager.createTask(disconnectMessage, clientRunnable);
-        }catch (Exception e){
-            System.out.println("[!] Error ServerManager.createDisconnectTask: " + e.getMessage());
-        }
-    }
-
-    public void closeConnection(ClientRunnable source) {
-        try {
-            source.close();
-            clientList.remove(source);
-        } catch (Exception e) {
-            System.out.println("[!] Error ServerManager.closeConnection: " + e.getMessage());
-        }
     }
 }

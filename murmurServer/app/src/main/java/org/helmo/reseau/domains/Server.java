@@ -1,6 +1,7 @@
 package org.helmo.reseau.domains;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class Server {
@@ -10,20 +11,18 @@ public class Server {
     private int multicastPort;
     private int unicastPort;
     private int relayPort;
-    private String networkInterface;
     private String base64AES;
     private boolean tls;
     private List<User> userList;
     private List<Tag> tagsList;
 
-    public Server(String domain, int saltSizeInBytes, String multicastAddress, int multicastPort, int unicastPort, int relayPort, String networkInterface, String base64AES, boolean tls, List<User> userList, List<Tag> tagsList) {
+    public Server(String domain, int saltSizeInBytes, String multicastAddress, int multicastPort, int unicastPort, int relayPort, String base64AES, boolean tls, List<User> userList, List<Tag> tagsList) {
         this.domain = domain;
         this.saltSizeInBytes = saltSizeInBytes;
         this.multicastAddress = multicastAddress;
         this.multicastPort = multicastPort;
         this.unicastPort = unicastPort;
         this.relayPort = relayPort;
-        this.networkInterface = networkInterface;
         this.base64AES = base64AES;
         this.tls = tls;
         this.userList = userList;
@@ -37,27 +36,16 @@ public class Server {
     public void addUser(User user) {
         this.userList.add(user);
     }
-
-    public User getUserByName(String name) {
-        return userList.stream().filter(u -> u.getLogin().equals(name)).findFirst().orElse(null);
+    public void addTag(String name) {
+        this.tagsList.add(new Tag(name, new ArrayList<>()));
     }
-    public boolean doYouKnowThisUser(User user) {
-        return userList.stream().anyMatch(u -> u.getLogin().equals(user.getLogin()));
+    public boolean hasUser(User user){
+        //TODO: Vérifier avec contains (mdp différent ou quoi) : return this.userList.contains(user);
+        return this.userList.stream().anyMatch(u -> u.getLogin().equals(user.getLogin()));
     }
-
-    public void addTagIfNotExist(String tagName) {
-        if (tagsList.stream().noneMatch(t -> t.getName().equals(tagName))) {
-            tagsList.add(new Tag(tagName, new ArrayList<>()));
-        }
+    public boolean hasTag(String name){
+        return this.tagsList.stream().anyMatch(t -> t.getName().equals(name));
     }
-
-    public void addUserToTag(String tagName, String user) {
-        Tag tag = tagsList.stream().filter(t -> t.getName().equals(tagName)).findFirst().orElse(null);
-        if (tag != null) {
-            tag.addUser(user);
-        }
-    }
-
     public int getUnicastPort() {
         return unicastPort;
     }
@@ -78,10 +66,6 @@ public class Server {
         return relayPort;
     }
 
-    public String getNetworkInterface() {
-        return networkInterface;
-    }
-
     public String getBase64AES() {
         return base64AES;
     }
@@ -97,4 +81,13 @@ public class Server {
     public List<Tag> getTagsList() {
         return tagsList;
     }
+
+    public User getUser(String name) {
+        return this.userList.stream().filter(u -> u.getLogin().equals(name)).findFirst().orElse(null);
+    }
+
+    public List<String> getFollowers(String tag) {
+        return this.tagsList.stream().filter(t -> t.getName().equals(tag)).findFirst().map(Tag::getUsers).orElse(new ArrayList<>());
+    }
+
 }

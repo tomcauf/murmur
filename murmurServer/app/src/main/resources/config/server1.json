@@ -1,14 +1,1 @@
-{
-  "currentDomain": "server1.godswila.guru",
-  "saltSizeInBytes": 16,
-  "multicastAddress": "224.1.1.255",
-  "multicastPort": 23845,
-  "unicastPort": 12020,
-  "relayPort": 23847,
-  "networkInterface": "eth12",
-  "base64AES": "P3FXqAUgfhy5cTjYdWlPQBJ/d6fdpbR88YsDPWPbo14\u003d",
-  "tls": true,
-  "users": [
-  ],
-  "tags": []
-}
+{"currentDomain":"server1.godswila.guru","saltSizeInBytes":16,"multicastAddress":"224.1.1.255","multicastPort":23001,"unicastPort":12020,"relayPort":23002,"base64AES":"P3FXqAUgfhy5cTjYdWlPQBJ/d6fdpbR88YsDPWPbo14\u003d","tls":true,"users":[{"login":"godswila","bcryptHash":"Ir5nbW8BXA0z3kln.hgQh6LeK02I6YK","bcryptRound":14,"bcryptSalt":"EJ/eksMoKgWDM9SX3qZjuO","followers":["Mouchakk@server1.godswila.guru"],"userTags":[],"lockoutCounter":0},{"login":"Mouchakk","bcryptHash":"1m/dZur4hgTOFXe0N5Qpa/GX5v49nBS","bcryptRound":14,"bcryptSalt":"uJ/0rrGJ8WOTbnFLYOrQC.","followers":[],"userTags":[],"lockoutCounter":0}],"tags":[]}

@@ -9,20 +9,18 @@ public class ServerDto {
     private int multicastPort;
     private int unicastPort;
     private int relayPort;
-    private String networkInterface;
     private String base64AES;
     private boolean tls;
     private List<UserDto> users;
     private List<TagDto> tags;
 
-    public ServerDto(String domain, int saltSizeInBytes, String multicastAddress, int multicastPort, int unicastPort, int relayPort, String networkInterface, String base64AES, boolean tls, List<UserDto> users, List<TagDto> tags) {
+    public ServerDto(String domain, int saltSizeInBytes, String multicastAddress, int multicastPort, int unicastPort, int relayPort, String base64AES, boolean tls, List<UserDto> users, List<TagDto> tags) {
         this.currentDomain = domain;
         this.saltSizeInBytes = saltSizeInBytes;
         this.multicastAddress = multicastAddress;
         this.multicastPort = multicastPort;
         this.unicastPort = unicastPort;
         this.relayPort = relayPort;
-        this.networkInterface = networkInterface;
         this.base64AES = base64AES;
         this.tls = tls;
         this.users = users;
@@ -51,10 +49,6 @@ public class ServerDto {
 
     public int getRelayPort() {
         return relayPort;
-    }
-
-    public String getNetworkInterface() {
-        return networkInterface;
     }
 
     public String getBase64AES() {

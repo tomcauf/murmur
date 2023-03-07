@@ -1,16 +1,17 @@
 package org.helmo.reseau.domains;
 
-import org.helmo.reseau.clients.Entity;
+import org.helmo.reseau.clients.ClientRunnable;
+
 import java.util.List;
 
 public class Task {
     private int id;
     private String type;
-    private Entity source;
+    private ClientRunnable source;
     private List<String> destination;
     private String[] command;
     private StatusOfTask status;
-    public Task(int id, String type, Entity source, List<String> destination, String[] command, StatusOfTask status) {
+    public Task(int id, String type, ClientRunnable source, List<String> destination, String[] command, StatusOfTask status) {
         this.id = id;
         this.type = type;
         this.source = source;
@@ -27,7 +28,7 @@ public class Task {
         return type;
     }
 
-    public Entity getSource() {
+    public ClientRunnable getSource() {
         return source;
     }
 
