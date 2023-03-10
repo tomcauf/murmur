@@ -8,23 +8,22 @@ import org.murmurRelay.servers.ClientServerRunnable;
 import org.murmurRelay.utils.NetChooser;
 
 import java.net.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RelayManager {
     private final IRelayRepository repository;
     private final NetChooser netChooser;
     private final Relay relay;
     private final Protocol protocol;
-    private final List<String> serversNotAvailable = new ArrayList<>();
-    private final Map<String,String> unicastServers = new HashMap<>();
+    private final List<String> serversNotAvailable;
+    private final Map<String,Server> unicastServers;
 
     public RelayManager(IRelayRepository repo, NetChooser netChooser,Protocol protocol) {
         this.repository = repo;
         this.netChooser = netChooser;
         this.protocol = protocol;
+        this.serversNotAvailable = Collections.synchronizedList(new ArrayList<>());
+        this.unicastServers = Collections.synchronizedMap(new HashMap<>());
         relay = repository.getRelay();
     }
 
@@ -34,7 +33,7 @@ public class RelayManager {
         NetworkInterface selectedInterface = netChooser.getSelectedInterface();
 
         try {
-            InetAddress mcastaddr = InetAddress.getByName(relay.getMulticastAdress());
+            InetAddress mcastaddr = InetAddress.getByName(relay.getMulticastAddress());
             group = new InetSocketAddress(mcastaddr, relay.getMulticastPort());
             multicastSocket = new MulticastSocket(relay.getMulticastPort());
 
@@ -46,7 +45,7 @@ public class RelayManager {
                 multicastSocket.receive(recv);
                 String messageReceived = new String(recv.getData(),recv.getOffset(),recv.getLength());
                 System.out.println(messageReceived);
-                handleMessage(messageReceived);
+                handleMessage(messageReceived,recv.getAddress());
             }
         } catch(Exception e) {
             System.out.println("Error while executing relay");
@@ -61,30 +60,30 @@ public class RelayManager {
         }
     }
 
-    public void handleMessage(String messageReceived) {
+    public void handleMessage(String messageReceived,InetAddress ipAddress) {
         String[] checkMessage = protocol.verifyMessage(messageReceived);
         if(checkMessage[0].matches("ECHO")) {
             String serverAESKey;
             String port = checkMessage[1];
             String domain = checkMessage[2];
-            if((serverAESKey = getServerKey(domain)) != null && checkIfServerIsAvailable(domain)) {
-                addUnicastServer(domain,port);
+            if((serverAESKey = checkIfServerKeyExists(domain)) != null && checkIfServerIsAvailable(domain)) {
+                addUnicastServer(domain,port,serverAESKey,ipAddress);
                 setDomainNotAvailable(domain);
-                (new Thread(new ClientServerRunnable(this, Integer.parseInt(port),domain,serverAESKey))).start();
+                (new Thread(new ClientServerRunnable(this,domain,Integer.parseInt(port),ipAddress,serverAESKey))).start();
             }
         }
     }
 
     public int getUnicastDestinationPort(String domain) {
         if(unicastServers.containsKey(domain)) {
-            return Integer.parseInt(unicastServers.get(domain));
+            return unicastServers.get(domain).getPort();
         }
         return -1;
     }
 
-    private void addUnicastServer(String domain,String port) {
+    private void addUnicastServer(String domain,String port,String serverAESKey,InetAddress ipAddress) {
         if(!unicastServers.containsKey(domain)) {
-            unicastServers.put(domain,port);
+            unicastServers.put(domain,new Server(domain,serverAESKey,ipAddress,Integer.parseInt(port)));
         }
     }
 
@@ -96,11 +95,25 @@ public class RelayManager {
         return protocol;
     }
 
-    public String getServerKey(String domain) {
+    private String checkIfServerKeyExists(String domain) {
         for(var server : getRelayServerList()) {
             if(server.getDomain().equals(domain)) {
                 return server.getBase64AES();
             }
+        }
+        return null;
+    }
+
+    public String getServerKey(String domain) {
+        if(unicastServers.containsKey(domain)) {
+            return unicastServers.get(domain).getBase64AES();
+        }
+        return null;
+    }
+
+    public InetAddress getIpAddress(String domain) {
+        if(unicastServers.containsKey(domain)) {
+            return unicastServers.get(domain).getIpAddress();
         }
         return null;
     }

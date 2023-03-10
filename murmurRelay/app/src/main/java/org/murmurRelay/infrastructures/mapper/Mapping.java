@@ -36,7 +36,7 @@ public class Mapping {
                 serverListDto.add(new ServerDto(server.getDomain(),server.getBase64AES()));
             }
 
-            return new RelayDto(relay.getMulticastAdress(),relay.getMulticastPort(),serverListDto);
+            return new RelayDto(relay.getMulticastAddress(),relay.getMulticastPort(),serverListDto);
         }
     }
 }

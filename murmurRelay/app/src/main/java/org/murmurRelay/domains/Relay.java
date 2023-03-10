@@ -14,7 +14,7 @@ public class Relay {
         this.serverList = new ArrayList<>(serverList);
     }
 
-    public String getMulticastAdress() {
+    public String getMulticastAddress() {
         return multicastAdress;
     }
 
