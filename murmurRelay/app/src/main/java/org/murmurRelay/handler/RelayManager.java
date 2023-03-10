@@ -4,7 +4,7 @@ import org.murmurRelay.domains.Relay;
 import org.murmurRelay.domains.Server;
 import org.murmurRelay.grammar.Protocol;
 import org.murmurRelay.repositories.IRelayRepository;
-import org.murmurRelay.servers.ClientServerRunnable;
+import org.murmurRelay.servers.ServerRunnable;
 import org.murmurRelay.utils.NetChooser;
 
 import java.net.*;
@@ -15,15 +15,13 @@ public class RelayManager {
     private final NetChooser netChooser;
     private final Relay relay;
     private final Protocol protocol;
-    private final List<String> serversNotAvailable;
-    private final Map<String,Server> unicastServers;
+    private final Map<String,ServerRunnable> serversInUse;
 
     public RelayManager(IRelayRepository repo, NetChooser netChooser,Protocol protocol) {
         this.repository = repo;
         this.netChooser = netChooser;
         this.protocol = protocol;
-        this.serversNotAvailable = Collections.synchronizedList(new ArrayList<>());
-        this.unicastServers = Collections.synchronizedMap(new HashMap<>());
+        this.serversInUse = Collections.synchronizedMap(new HashMap<>());
         relay = repository.getRelay();
     }
 
@@ -53,6 +51,7 @@ public class RelayManager {
             if(multicastSocket != null) {
                 try {
                     multicastSocket.leaveGroup(group, selectedInterface);
+                    multicastSocket.close();
                 } catch(Exception e) {
                     System.out.println("Error while leaving multicast group");
                 }
@@ -66,24 +65,18 @@ public class RelayManager {
             String serverAESKey;
             String port = checkMessage[1];
             String domain = checkMessage[2];
-            if((serverAESKey = checkIfServerKeyExists(domain)) != null && checkIfServerIsAvailable(domain)) {
-                addUnicastServer(domain,port,serverAESKey,ipAddress);
-                setDomainNotAvailable(domain);
-                (new Thread(new ClientServerRunnable(this,domain,Integer.parseInt(port),ipAddress,serverAESKey))).start();
+            if((serverAESKey = checkIfServerKeyExists(domain)) != null && !checkIfServerIsRunning(domain)) {
+                var clientServerRunnable = new ServerRunnable(this,domain,Integer.parseInt(port),ipAddress,serverAESKey);
+                addRunningServer(domain,clientServerRunnable);
+                (new Thread(clientServerRunnable)).start();
             }
         }
     }
 
-    public int getUnicastDestinationPort(String domain) {
-        if(unicastServers.containsKey(domain)) {
-            return unicastServers.get(domain).getPort();
-        }
-        return -1;
-    }
-
-    private void addUnicastServer(String domain,String port,String serverAESKey,InetAddress ipAddress) {
-        if(!unicastServers.containsKey(domain)) {
-            unicastServers.put(domain,new Server(domain,serverAESKey,ipAddress,Integer.parseInt(port)));
+    public void sendMessage(String messageToSend,String domain) {
+        var server = serversInUse.get(domain);
+        if(server != null) {
+            server.sendMessage(messageToSend);
         }
     }
 
@@ -104,31 +97,17 @@ public class RelayManager {
         return null;
     }
 
-    public String getServerKey(String domain) {
-        if(unicastServers.containsKey(domain)) {
-            return unicastServers.get(domain).getBase64AES();
-        }
-        return null;
+    private boolean checkIfServerIsRunning(String domain) {
+        return serversInUse.containsKey(domain);
     }
 
-    public InetAddress getIpAddress(String domain) {
-        if(unicastServers.containsKey(domain)) {
-            return unicastServers.get(domain).getIpAddress();
-        }
-        return null;
+    public void removeRunningServer(String domain) {
+        serversInUse.remove(domain);
     }
 
-    public boolean checkIfServerIsAvailable(String domain) {
-        return !serversNotAvailable.contains(domain);
-    }
-
-    public void setDomainAvailable(String domain) {
-        serversNotAvailable.remove(domain);
-    }
-
-    public void setDomainNotAvailable(String domain) {
-        if(!serversNotAvailable.contains(domain)) {
-            serversNotAvailable.add(domain);
+    private void addRunningServer(String domain, ServerRunnable client) {
+        if(!serversInUse.containsKey(domain)) {
+            serversInUse.put(domain,client);
         }
     }
 }
