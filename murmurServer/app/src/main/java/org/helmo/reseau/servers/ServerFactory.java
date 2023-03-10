@@ -6,11 +6,14 @@ import org.helmo.reseau.infrastructures.mapper.ServerMapper;
 import org.helmo.reseau.repositories.IServerRepositories;
 import org.helmo.reseau.tasks.TaskManager;
 
+import java.net.NetworkInterface;
 import java.nio.file.Paths;
 
 public class ServerFactory {
     private ServerManager serverManager;
-    public ServerFactory(String configFileName, String certificateFileName, String certificatePassword) {
+    private RelayManager relayManager;
+
+    public ServerFactory(String configFileName, String certificateFileName, String certificatePassword, NetworkInterface selectedInterface) {
         String resourceFolder;
         if(Paths.get("").toAbsolutePath().toString().contains("app")) {
             resourceFolder = Paths.get("","src","main","resources").toAbsolutePath().toString();
@@ -31,12 +34,17 @@ public class ServerFactory {
         TLSSocketFactory tlsSocketFactory = new TLSSocketFactory(certificatePath, certificateFileName, certificatePassword);
 
         TaskManager taskManager = new TaskManager();
+
         serverManager = new ServerManager(repositories, tlsSocketFactory, taskManager);
+        relayManager = new RelayManager(repositories,taskManager,selectedInterface);
+
     }
 
     public void start() {
         if(serverManager != null) {
             serverManager.startServer();
+            relayManager.start();
+
         }else{
             System.out.println("[!] Error: serverManager is null");
         }

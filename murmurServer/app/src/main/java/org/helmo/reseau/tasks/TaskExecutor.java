@@ -8,10 +8,15 @@ import org.helmo.reseau.grammar.Protocol;
 import org.helmo.reseau.servers.ServerManager;
 
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class TaskExecutor implements Runnable{
     private TaskManager taskManager;
@@ -67,6 +72,7 @@ public class TaskExecutor implements Runnable{
                 }*/
             } else {
                 //TODO: Envoyé au RELAY la demande de FOLLOW
+
             }
         }else{
             if(domain.equals(serverManager.getServerDomain())) {
@@ -81,6 +87,7 @@ public class TaskExecutor implements Runnable{
                 }*/
             } else {
                 //TODO: Envoyé au RELAY la demande de FOLLOW
+
             }
         }
 
@@ -134,5 +141,7 @@ public class TaskExecutor implements Runnable{
         }
         return tags;
     }
+
+
 
 }

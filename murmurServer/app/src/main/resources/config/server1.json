@@ -1,1 +1,58 @@
-{"currentDomain":"server1.godswila.guru","saltSizeInBytes":16,"multicastAddress":"224.1.1.255","multicastPort":23001,"unicastPort":12020,"relayPort":23002,"base64AES":"P3FXqAUgfhy5cTjYdWlPQBJ/d6fdpbR88YsDPWPbo14\u003d","tls":true,"users":[{"login":"Mouchakk","bcryptHash":"Xi7f55fxB4tk6F10pwXNzvUGo7BOvPe","bcryptRound":14,"bcryptSalt":"HS8PrWBWn2LXjZq9PhqZXu","followers":["steph@server1.godswila.guru"],"userTags":["#tagged@server1.godswila.guru"],"lockoutCounter":0},{"login":"godswila","bcryptHash":"/hV3jb7q8J4WQcmIq.t52lXNC4oKdPa","bcryptRound":14,"bcryptSalt":"YRPSb6uPV/FawofW6ExbEO","followers":["Mouchakk@server1.godswila.guru"],"userTags":["#tagged@server1.godswila.guru"],"lockoutCounter":0},{"login":"steph","bcryptHash":"8IHTUny9dUZLMdDfrPOqaPb6P9p359y","bcryptRound":14,"bcryptSalt":"D5tclIW/awAIdonFB/1bJu","followers":["godswila@server1.godswila.guru"],"userTags":[],"lockoutCounter":0}],"tags":[{"name":"#tagged","users":["Mouchakk@server1.godswila.guru","godswila@server1.godswila.guru"]}]}
+{
+  "currentDomain": "server1.godswila.guru",
+  "saltSizeInBytes": 16,
+  "multicastAddress": "224.1.1.255",
+  "multicastPort": 23001,
+  "unicastPort": 12020,
+  "relayPort": 23002,
+  "base64AES": "P3FXqAUgfhy5cTjYdWlPQBJ/d6fdpbR88YsDPWPbo14\u003d",
+  "tls": true,
+  "users": [
+    {
+      "login": "Mouchakk",
+      "bcryptHash": "Xi7f55fxB4tk6F10pwXNzvUGo7BOvPe",
+      "bcryptRound": 14,
+      "bcryptSalt": "HS8PrWBWn2LXjZq9PhqZXu",
+      "followers": [
+        "steph@server1.godswila.guru"
+      ],
+      "userTags": [
+        "#tagged@server1.godswila.guru"
+      ],
+      "lockoutCounter": 0
+    },
+    {
+      "login": "godswila",
+      "bcryptHash": "/hV3jb7q8J4WQcmIq.t52lXNC4oKdPa",
+      "bcryptRound": 14,
+      "bcryptSalt": "YRPSb6uPV/FawofW6ExbEO",
+      "followers": [
+        "Mouchakk@server1.godswila.guru"
+      ],
+      "userTags": [
+        "#tagged@server1.godswila.guru"
+      ],
+      "lockoutCounter": 0
+    },
+    {
+      "login": "steph",
+      "bcryptHash": "8IHTUny9dUZLMdDfrPOqaPb6P9p359y",
+      "bcryptRound": 14,
+      "bcryptSalt": "D5tclIW/awAIdonFB/1bJu",
+      "followers": [
+        "godswila@server1.godswila.guru"
+      ],
+      "userTags": [],
+      "lockoutCounter": 0
+    }
+  ],
+  "tags": [
+    {
+      "name": "#tagged",
+      "users": [
+        "Mouchakk@server1.godswila.guru",
+        "godswila@server1.godswila.guru"
+      ]
+    }
+  ]
+}

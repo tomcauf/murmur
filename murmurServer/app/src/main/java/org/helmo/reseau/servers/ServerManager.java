@@ -47,7 +47,6 @@ public class ServerManager {
             while (true) {
                 SSLSocket clientSocket = (SSLSocket) serverSocket.accept();
                 System.out.println("[+] New client connected");
-
                 ClientRunnable client = new ClientRunnable(clientSocket, this, protocol);
                 clientList.add(client);
                 (new Thread(client)).start();
