@@ -11,3 +11,8 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 network-interface = "1.0"
 if-addrs = "0.10.1"
+multicast-socket = "0.2.2"
+multicast_dns = "0.5.0"
+libc = "0.2.140"
+aes = "0.8.2"
+aes-gcm = "0.10.1"

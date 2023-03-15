@@ -2,6 +2,7 @@ use network_interface::{NetworkInterface, NetworkInterfaceConfig};
 use std::io::{self, Write};
 use std::vec::Vec;
 
+#[derive(Clone)]
 pub struct NetChooser {
     interfaces: Vec<NetworkInterface>,
     selected_interface: Option<NetworkInterface>,
@@ -21,7 +22,7 @@ impl NetChooser {
         self.interfaces.iter().map(|iface| iface.name.clone()).collect()
     }
 
-    pub fn select_interface(&mut self){
+    pub fn select_interface(&self) -> NetworkInterface {
         let mut stdout = io::stdout();
         let stdin = io::stdin();
 
@@ -35,10 +36,7 @@ impl NetChooser {
         let mut input = String::new();
         stdin.read_line(&mut input).unwrap();
         let selected_index = input.trim().parse::<usize>().unwrap();
-
-        self.selected_interface = self.get_interface_by_index(selected_index).cloned();
-    }
-    pub fn get_interface_information(&self) -> Option<NetworkInterface> {
-        self.selected_interface.clone()
+        let selected_interface = self.get_interface_by_index(selected_index).unwrap();
+        selected_interface.clone()
     }
 }
