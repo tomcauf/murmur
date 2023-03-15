@@ -35,15 +35,17 @@ public class ServerFactory {
 
         TaskManager taskManager = new TaskManager();
 
-        serverManager = new ServerManager(repositories, tlsSocketFactory, taskManager);
+
         relayManager = new RelayManager(repositories,taskManager,selectedInterface);
+        serverManager = new ServerManager(repositories, tlsSocketFactory, taskManager,relayManager);
+
 
     }
 
     public void start() {
         if(serverManager != null) {
-            serverManager.startServer();
-            relayManager.start();
+            (new Thread(serverManager)).start();
+            (new Thread (relayManager)).start();
 
         }else{
             System.out.println("[!] Error: serverManager is null");

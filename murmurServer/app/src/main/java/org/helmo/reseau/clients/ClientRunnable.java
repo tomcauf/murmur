@@ -98,7 +98,7 @@ public class ClientRunnable implements Runnable, Closeable {
 
             String salt = decryptedHash[3].substring(0, saltSize);
             String hash = decryptedHash[3].substring(saltSize);
-
+            System.out.println("User: " + name + "  ");
             User user = new User(name, hash, Integer.parseInt(decryptedHash[2]), salt, new ArrayList<>(), new ArrayList<>(), 0);
             if (serverManager.registerUser(user)) {
                 sendMessage(protocol.buildOk("User registered"));

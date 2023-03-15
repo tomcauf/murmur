@@ -20,6 +20,8 @@ public class MulticastRunnable implements Runnable{
     public void run() {
 
 
+        System.out.println("Cocou  c est multicast runnable");
+
 
 
         Protocol p = new Protocol();

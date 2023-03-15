@@ -22,4 +22,8 @@ public class TaskManager {
     public Task getNextTask() {
         return tasks.poll();
     }
+
+    public int getId() {
+        return idCounter;
+    }
 }

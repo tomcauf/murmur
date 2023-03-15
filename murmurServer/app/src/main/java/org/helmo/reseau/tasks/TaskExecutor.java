@@ -8,15 +8,10 @@ import org.helmo.reseau.grammar.Protocol;
 import org.helmo.reseau.servers.ServerManager;
 
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class TaskExecutor implements Runnable{
     private TaskManager taskManager;
@@ -71,7 +66,14 @@ public class TaskExecutor implements Runnable{
                     source.sendMessage(protocol.buildError("You are already following " + follow));
                 }*/
             } else {
-                //TODO: Envoyé au RELAY la demande de FOLLOW
+                String domainInfo = serverManager.getServerDomain();
+                String idMessage = String.format("%d@%s",taskManager.getId(),domainInfo);
+                StringBuilder sb = new StringBuilder();
+                for (String str : command)
+                    sb.append(str).append(" ");
+
+
+                serverManager.sendMessageToRelay(protocol.buildSend(idMessage,domainInfo,follow,sb.toString()));
 
             }
         }else{
@@ -86,7 +88,13 @@ public class TaskExecutor implements Runnable{
                     source.sendMessage(protocol.buildError("You are already following " + follow));
                 }*/
             } else {
-                //TODO: Envoyé au RELAY la demande de FOLLOW
+                String domainInfo = serverManager.getServerDomain();
+                String idMessage = String.format("%d@%s",taskManager.getId(),domainInfo);
+                StringBuilder sb = new StringBuilder();
+                for (String str : command)
+                    sb.append(str).append(" ");
+
+                serverManager.sendMessageToRelay(protocol.buildSend(idMessage, domainInfo, follow, sb.toString()));
 
             }
         }
@@ -100,7 +108,10 @@ public class TaskExecutor implements Runnable{
         List<String> destinataires = getDestination(currentTask);
         ClientRunnable source = currentTask.getSource();
         String serverDomain = serverManager.getServerDomain();
-        //TODO: Doit changer pour envoyer au Relay les MSG en "mieux".
+        String domainInfo = serverManager.getServerDomain();
+
+
+
         for (String destinataire : destinataires) {
             String sender = source.getUsername() + "@" + serverDomain;
             String name = destinataire.substring(0, destinataire.indexOf("@"));
@@ -110,6 +121,13 @@ public class TaskExecutor implements Runnable{
                 if (clientRunnable != null) {
                     clientRunnable.sendMessage(protocol.buildMsgs(sender, message));
                 }
+            }else{
+                String idMessage = String.format("%d@%s",taskManager.getId(),domainInfo);
+                StringBuilder sb = new StringBuilder();
+                for (String str : command)
+                    sb.append(str).append(" ");
+                serverManager.sendMessageToRelay(protocol.buildSend(idMessage, domainInfo, message, sb.toString()));
+
             }
         }
 
