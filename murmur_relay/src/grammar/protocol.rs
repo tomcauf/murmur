@@ -65,7 +65,7 @@ impl Protocol {
     pub fn new() -> Self {
         let rx_chiffre = "[0-9]".to_string();
         let rx_lettre = "[a-zA-Z]".to_string();
-        let rx_lettre_chiffre = format!("{}{}", rx_lettre, rx_chiffre).to_string();
+        let rx_lettre_chiffre = format!("[{}{}]", rx_lettre, rx_chiffre).to_string();
         let rx_caractere_imprimable = "[\\x20-\\xff]".to_string();
         let rx_crlf = "\\x0d\\x0a".to_string();
         let rx_symbole = "[\\x21-\\x2f\\x3a-\\x40\\x5b-\\x60]".to_string();
@@ -82,9 +82,9 @@ impl Protocol {
         let rx_message_interne = format!("{}{{1,500}}", rx_caractere_imprimable).to_string();
         let rx_nom_utilisateur = format!("{}{{5,20}}", rx_lettre_chiffre).to_string();
         let rx_tag = format!("#{}{{5,20}}", rx_lettre_chiffre).to_string();
-        let rx_nom_domaine = format!("{}{{5,20}}", rx_lettre_chiffre).to_string();
-        let rx_tag_domaine = format!("#{}{{5,20}}", rx_lettre_chiffre).to_string();
-        let rx_id_domaine = format!("{}{{1,5}}", rx_chiffre).to_string();
+        let rx_nom_domaine = format!("{}@{}", rx_nom_utilisateur, rx_domaine).to_string();
+        let rx_tag_domaine = format!("{}@{}", rx_tag, rx_domaine).to_string();
+        let rx_id_domaine = format!("{}{{1,5}}@{}", rx_chiffre, rx_domaine).to_string();
 
         let rx_hello = format!(r"(HELLO){}({}){}({})({}){{0,1}}", rx_esp, rx_domaine, rx_esp, rx_random22, rx_crlf).to_string();
         let rx_connect = format!("(CONNECT){}({}){}({})({}){{0,1}}", rx_esp, rx_nom_utilisateur, rx_esp, rx_sha3_hex, rx_crlf).to_string();
@@ -98,7 +98,7 @@ impl Protocol {
         let rx_error = format!(r"(-ERR){}({})({}){{0,1}}", rx_esp, rx_message, rx_crlf);
         let rx_disconnect = format!(r"(DISCONNECT)({}){{0,1}}", rx_crlf);
         let rx_echo= format!(r"(ECHO){}({}){}({})({}){{0,1}}", rx_esp, rx_port, rx_esp, rx_domaine, rx_crlf);
-        let rx_send= format!(r"(SEND){}({}){}({}){}({}){}({})({}){{0,1}}", rx_esp, rx_id_domaine, rx_esp, rx_nom_domaine, rx_esp,rx_tag_domaine, rx_esp, rx_message_interne, rx_crlf).to_string();
+        let rx_send = format!("(SEND){}({}){}({}){}({}|{}){}({})", rx_esp, rx_id_domaine, rx_esp, rx_nom_domaine, rx_esp, rx_nom_domaine, rx_tag_domaine, rx_esp, rx_message_interne).to_string();
 
         let hello = format!(r"HELLO <domaine> <random22>{}", rx_crlf).to_string();
         let connect = format!(r"CONNECT <nom-utilisateur>{}", rx_crlf).to_string();
@@ -112,7 +112,7 @@ impl Protocol {
         let error = format!(r"-ERR <message>{}", rx_crlf).to_string();
         let disconnect = format!(r"DISCONNECT{}", rx_crlf).to_string();
         let echo = format!(r"ECHO <port> <domaine>{}", rx_crlf).to_string();
-        let send = format!(r"SEND <id-domaine> <nom-domaine> <nom-ou-tag-domaine> <message-interne>{}", rx_crlf).to_string();
+        let send = format!(r"SEND <id-domaine> <nom-domaine> <nom-ou-tag-domaine> <message-interne>").to_string();
 
         Self {
             rx_chiffre,
@@ -263,16 +263,18 @@ impl Protocol {
 
     pub fn build_echo(&self, port: &str, domain: &str) -> String {
         let echo_message = self.echo.replace("<port>", port).replace("<domaine>", domain);
-        if echo_message.matches(&self.rx_echo).count() == 1 {
+        let message = self.verify_message(&echo_message);
+        if message[0] == "ECHO" {
             echo_message
         } else {
-            panic!("Please provide correct arguments for the construction of the ECHO message");
+            panic!("Please provide correct arguments for the construction of the SEND message");
         }
     }
 
     pub fn build_send(&self, id_domain: &str, domain_name: &str, name_or_tag_domain: &str, internal_message: &str) -> String {
         let send_message = self.send.replace("<id-domaine>", id_domain).replace("<nom-domaine>", domain_name).replace("<nom-ou-tag-domaine>", name_or_tag_domain).replace("<message-interne>", internal_message);
-        if send_message.matches(&self.rx_send).count() == 1 {
+        let message = self.verify_message(&send_message);
+        if message[0] == "SEND" {
             send_message
         } else {
             panic!("Please provide correct arguments for the construction of the SEND message");

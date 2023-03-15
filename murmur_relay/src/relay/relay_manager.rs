@@ -95,13 +95,13 @@ impl RelayManager {
     fn handle_message(&self, message_received: &str, ip_address: SocketAddr) {
         let check_message = self.protocol.verify_message(message_received);
         if check_message[0] == "ECHO" {
+            println!("Message received is an echo message : {}", check_message[0]);
             let port = &check_message[1];
             let domain = &check_message[2];
             let relay = self.repositories.get_relay();
             let server = relay.get_server(domain.as_str());
             let socket = SocketAddr::new(ip_address.ip(), port.parse::<u16>().unwrap());
             if (server.get_domain() != "null" && server.get_base64_aes() != "null") && (self.server_list.lock().unwrap().contains_key(domain) == false) {
-               let shared_server_list = self.server_list.clone();
                let server_runnable = ServerRunnable::new(self.clone(),server.get_domain().to_string(), server.get_base64_aes().to_string(), self.protocol.clone(),socket);
 
                 let mut server_list = self.server_list.lock().unwrap();

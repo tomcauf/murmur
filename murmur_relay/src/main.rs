@@ -24,4 +24,9 @@ fn main() {
         Protocol::new(),
     );
     relay_manager.start();
+    /*let protocol = Protocol::new();
+    let messageProtocol = protocol.build_send("1@server1.godswila.guru","maxime123@server1.godswila.guru","maxime345@server2.godswila.guru","COUCOU JE SUIS LE MESSAGE du serveur 1");
+
+    let messageTab = protocol.verify_message(&messageProtocol);
+    println!("Message : {}",messageTab[0]); */
 }

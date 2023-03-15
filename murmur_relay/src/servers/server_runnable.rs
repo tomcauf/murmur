@@ -30,7 +30,7 @@ impl ServerRunnable{
     }
     pub fn start(&self){
         let mut buffer = [0; 1024];
-        print!("ServerRunnable run : {}", self.socket_addr);
+        println!("ServerRunnable run : {}", self.socket_addr);
         //Se connecter avec l'ip 192.168.0.5 et le port 12021
         let mut stream = TcpStream::connect(self.socket_addr).unwrap();
         stream = stream.try_clone().unwrap();
@@ -40,6 +40,7 @@ impl ServerRunnable{
                 Ok(size) => {
                     let message_received = String::from_utf8_lossy(&buffer[..size]);
                     if size > 0 {
+                        println!("Message received: {}", message_received);
                         self.handle_message(&message_received);
                     }
                 }
@@ -55,8 +56,8 @@ impl ServerRunnable{
         }
     }
     fn handle_message(&self, message_received: &str) {
-        let message = AESCodec::decrypt(&self.base64_aes, message_received.as_bytes().to_vec()).unwrap();
-        println!("Message received: {}",message);
+        //let message = AESCodec::decrypt(&self.base64_aes, message_received.as_bytes().to_vec()).unwrap();
+        //println!("Message received: {}",message);
         let check_message = self.protocol.verify_message(message_received);
         if check_message[0] == "SEND" {
             let id_domain = &check_message[1];
@@ -71,7 +72,9 @@ impl ServerRunnable{
     }
     pub fn send_message(&self, message : String){
         let mut stream = TcpStream::connect(self.socket_addr).unwrap();
-        let message_aes = AESCodec::encrypt(&self.base64_aes, &message).unwrap();
-        stream.write(&message_aes).unwrap();
+        /*let message_aes = AESCodec::encrypt(&self.base64_aes, &message).unwrap();
+        stream.write(&message_aes).unwrap();*/
+        stream.write(message.as_bytes()).unwrap();
+        println!("Message sent: {}", message)
     }
 }
