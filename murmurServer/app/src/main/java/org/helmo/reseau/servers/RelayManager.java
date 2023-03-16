@@ -14,6 +14,7 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class RelayManager implements Runnable{
@@ -31,7 +32,7 @@ public class RelayManager implements Runnable{
         this.repo = repositories;
         this.server = repositories.getServer();
         this.si = selectedInterface;
-        idMessages = new ArrayList<>();
+        idMessages = Collections.synchronizedList(new ArrayList<>());
     }
 
     public boolean checkIfIdMessageExists(String idMessage) {
@@ -42,15 +43,12 @@ public class RelayManager implements Runnable{
         idMessages.add(idMessage);
     }
 
-
-
-    public void createTask(String[] message){
-
-                taskManager.createTask(null, message);
-            }
-
      public void sendMessageToRelay(String message){
-        relayRunnable.sendMessage(message);
+        if (relayRunnable != null) {
+            relayRunnable.sendMessage(message);
+        }else{
+            System.out.println("Relay not connected");
+        }
      }
 
     @Override
@@ -63,6 +61,7 @@ public class RelayManager implements Runnable{
             while (true) {
                 Socket relaySocket = serverSocket.accept();
                 relayRunnable = new RelayRunnable(taskManager,protocol,relaySocket,this);
+                System.out.println("[*] Relay connected");
                 (new Thread(relayRunnable)).start();
             }
         } catch (IOException e) {

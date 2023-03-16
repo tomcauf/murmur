@@ -5,28 +5,28 @@ import java.util.regex.Pattern;
 
 public class Protocol {
     // Définitions standards :
-    private final String RX_CHIFFRE = "[0-9]";
-    private final String RX_LETTRE = "[a-zA-Z]";
-    private final String RX_LETTRE_CHIFFRE = String.format("[%s%s]", RX_LETTRE, RX_CHIFFRE);
+    private final String RX_CHIFFRE = "0-9";
+    private final String RX_LETTRE = "a-zA-Z";
+    private final String RX_LETTRE_CHIFFRE = String.format("%s%s", RX_LETTRE, RX_CHIFFRE);
     private final String RX_CARACTERE_IMPRIMABLE = "[\\x20-\\xff]";
     private final String RX_CRLF = "\\x0d\\x0a"; // OU => \\r\\n
     private final String RX_SYMBOLE = "[\\x21-\\x2f\\x3a-\\x40\\x5b-\\x60]";
     private final String RX_ESP = "\\x20";
     private final String RX_DOMAINE = String.format("[%s%s]{5,200}", RX_LETTRE_CHIFFRE,"\\x2e");
-    private final String RX_PORT = String.format("%s{1,5}", RX_CHIFFRE);
-    private final String RX_ROUND = String.format("%s{2}", RX_CHIFFRE);
+    private final String RX_PORT = String.format("[%s]{1,5}", RX_CHIFFRE);
+    private final String RX_ROUND = String.format("[%s]{2}", RX_CHIFFRE);
     private final String RX_BCRYPT_HASH = String.format("\\$2b\\$%s\\$[%s%s]{1,70}", RX_ROUND, RX_LETTRE_CHIFFRE, RX_SYMBOLE);
-    private final String RX_SHA3_HEX = String.format("%s{30,200}", RX_LETTRE_CHIFFRE);
-    private final String RX_SALT_SIZE = String.format("%s{2}", RX_CHIFFRE);
+    private final String RX_SHA3_HEX = String.format("[%s]{30,200}", RX_LETTRE_CHIFFRE);
+    private final String RX_SALT_SIZE = String.format("[%s]{2}", RX_CHIFFRE);
     private final String RX_RANDOM22 = String.format("[%s%s]{22}", RX_LETTRE_CHIFFRE, RX_SYMBOLE);
     private final String RX_SALT = RX_RANDOM22;
     private final String RX_MESSAGE = String.format("%s{1,200}", RX_CARACTERE_IMPRIMABLE);
     private final String RX_MESSAGE_INTERNE = String.format("%s{1,500}", RX_CARACTERE_IMPRIMABLE);
-    private final String RX_NOM_UTILISATEUR = String.format("%s{5,20}", RX_LETTRE_CHIFFRE);
-    private final String RX_TAG = String.format("#(%s{5,20})", RX_LETTRE_CHIFFRE);
+    private final String RX_NOM_UTILISATEUR = String.format("[%s]{5,20}", RX_LETTRE_CHIFFRE);
+    private final String RX_TAG = String.format("#([%s]{5,20})", RX_LETTRE_CHIFFRE);
     private final String RX_NOM_DOMAINE = String.format("%s@%s", RX_NOM_UTILISATEUR, RX_DOMAINE);
     private final String RX_TAG_DOMAINE = String.format("%s@%s", RX_TAG, RX_DOMAINE);
-    private final String RX_ID_DOMAINE = String.format("%s{1,5}@%s", RX_CHIFFRE, RX_DOMAINE);
+    private final String RX_ID_DOMAINE = String.format("[%s]{1,5}@%s", RX_CHIFFRE, RX_DOMAINE);
 
     // Echanges entre le client et le Murmur Server :
     private final String RX_HELLO = String.format("(HELLO)%s(%s)%s(%s)(%s){0,1}", RX_ESP, RX_DOMAINE, RX_ESP, RX_RANDOM22, RX_CRLF);
@@ -45,7 +45,7 @@ public class Protocol {
     private final String RX_ECHO = String.format("(ECHO)%s(%s)%s(%s)(%s){0,1}", RX_ESP, RX_PORT, RX_ESP, RX_DOMAINE, RX_CRLF);
 
     // Echanges unicast entre Murmur Server et Murmur Relay :
-    private final String RX_SEND = String.format("(SEND)%s(%s)%s(%s)%s(%s|%s)%s(%s)(%s){0,1}", RX_ESP, RX_ID_DOMAINE, RX_ESP, RX_NOM_DOMAINE, RX_ESP, RX_NOM_DOMAINE, RX_TAG_DOMAINE, RX_ESP, RX_MESSAGE_INTERNE, RX_CRLF);
+    private final String RX_SEND = String.format("(SEND)%s(%s)%s(%s|%s)%s(%s|%s)%s(%s)(%s){0,1}", RX_ESP, RX_ID_DOMAINE, RX_ESP, RX_NOM_DOMAINE, RX_TAG_DOMAINE ,RX_ESP, RX_NOM_DOMAINE, RX_TAG_DOMAINE, RX_ESP, RX_MESSAGE_INTERNE, RX_CRLF);
     // Messages pour la construction :
     private final String HELLO = "HELLO <domaine> <random22>";
     private final String CONNECT = "CONNECT <nom-utilisateur>";
@@ -347,9 +347,8 @@ public class Protocol {
     private String[] verifySend(String message) {
         Pattern p = Pattern.compile(RX_SEND);
         Matcher m = p.matcher(message);
-
         if(m.matches()) {
-            return new String[]{m.group(1),m.group(2),m.group(3),m.group(4),m.group(5)};
+            return new String[]{m.group(1),m.group(2),m.group(3),m.group(5),m.group(7)};
         }
         return new String[]{"-ERR","This SEND message is not correctly formatted"};
     }

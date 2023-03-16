@@ -85,6 +85,9 @@ public class ServerManager implements Runnable{
     public void addFollowedTag(String follow, String tag) {
         server.addFollowedTag(follow, tag);
     }
+    public void addFollower(String destName, String sender) {
+        server.addFollower(destName, sender);
+    }
 
     public void sendMessageToRelay(String s){
         relayManager.sendMessageToRelay(s);

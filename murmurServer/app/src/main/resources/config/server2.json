@@ -1,0 +1,22 @@
+{
+  "currentDomain": "server2.godswila.guru",
+  "saltSizeInBytes": 16,
+  "multicastAddress": "224.1.1.255",
+  "multicastPort": 23001,
+  "unicastPort": 12021,
+  "relayPort": 12006,
+  "base64AES": "OpoyGQKQL66hSkxw50UMWeR3BcN2M+2PgKGvszDVuCE\u003d",
+  "tls": true,
+  "users": [
+    {
+      "login": "Mouchakk",
+      "bcryptHash": "jjr0iY.qrXgy6MzdSc7GzVDb/eKV2vi",
+      "bcryptRound": 14,
+      "bcryptSalt": "X/ICk3NJ/k2pqHIe6pPTi.",
+      "followers": ["godswila@server1.godswila.guru"],
+      "userTags": [],
+      "lockoutCounter": 0
+    }
+  ],
+  "tags": [{ "name": "tag2biz", "users": ["godswila@server1.godswila.guru"] }]
+}

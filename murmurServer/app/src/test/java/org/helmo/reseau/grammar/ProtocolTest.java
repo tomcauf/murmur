@@ -212,10 +212,15 @@ public class ProtocolTest {
     @Test
     public void testVerifyFollowName() throws Exception {
         String follow = "FOLLOW godswila@server1.godswila.guru";
+        String secondFollow = "FOLLOW Mouchakk@server2.godswila.guru";
         String[] result = protocol.verifyMessage(follow);
+        String[] secondResult = protocol.verifyMessage(secondFollow);
 
         assert result[0].equals("FOLLOW");
         assert result[1].equals("godswila@server1.godswila.guru");
+
+        assert secondResult[0].equals("FOLLOW");
+        assert secondResult[1].equals("Mouchakk@server2.godswila.guru");
     }
 
     /**
@@ -321,7 +326,22 @@ public class ProtocolTest {
      */
     @Test
     public void testVerifySend() throws Exception {
-//TODO: Test goes here...
+        String send = "SEND 1@server1.godswila.guru Mouchakk@server1.godswila.guru godswila@server2.godswila.guru FOLLOW godswila@server2.godswila.guru";
+        String Secondsend = "SEND 1@server1.godswila.guru Mouchakk@server1.godswila.guru #tagged@server2.godswila.guru FOLLOW #tagged@server2.godswila.guru";
+        String[] result = protocol.verifyMessage(send);
+        String[] secondResult = protocol.verifyMessage(Secondsend);
+
+        assert result[0].equals("SEND");
+        assert result[1].equals("1@server1.godswila.guru");
+        assert result[2].equals("Mouchakk@server1.godswila.guru");
+        assert result[3].equals("godswila@server2.godswila.guru");
+        assert result[4].equals("FOLLOW godswila@server2.godswila.guru");
+
+        assert secondResult[0].equals("SEND");
+        assert secondResult[1].equals("1@server1.godswila.guru");
+        assert secondResult[2].equals("#tagged@server1.godswila.guru");
+        assert secondResult[3].equals("godswila@server2.godswila.guru");
+        assert secondResult[4].equals("FOLLOW #tagged@server2.godswila.guru");
     }
 
 }

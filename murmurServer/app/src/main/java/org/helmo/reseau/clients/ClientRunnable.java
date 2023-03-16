@@ -56,7 +56,7 @@ public class ClientRunnable implements Runnable, Closeable {
     }
 
     private void handleMessage(String msg) {
-        System.out.println("[ClientRunnable] handleMessage: " + msg);
+        System.out.println("[*] C | Message: " + msg);
         String[] message = protocol.verifyMessage(msg);
         //TODO: Voir avec le prof si je peux le mettre directement ici
         if(message[0].equals("DISCONNECT")) {
@@ -193,9 +193,6 @@ public class ClientRunnable implements Runnable, Closeable {
     public void close() {
         try {
             isOnServer = false;
-            //TODO: Demander si je dois faire le in.close() et out.close()
-            //in.close();
-            //out.close();
             clientSocket.close();
         } catch (Exception e) {
             System.out.println("[!] Error ClientRunnable.close: " + e.getMessage());

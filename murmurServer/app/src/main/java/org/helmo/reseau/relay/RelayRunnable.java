@@ -42,12 +42,16 @@ public class RelayRunnable implements Runnable{
             String msg;
             while(isConnected && (msg = in.readLine()) != null) {
 
-                System.out.println(msg);
+                System.out.println("[*] R | Message: " + msg);
                 //decrypt
 
                 String[] message = protocol.verifyMessage(msg);
 
                 if (message[0].equals("SEND") ) {
+                    StringBuilder sb = new StringBuilder();
+                    for (String s : message) {
+                        sb.append(s).append(" ");
+                    }
                     if(!relayManager.checkIfIdMessageExists(message[1])) {
                         relayManager.addIdMessage(message[1]);
                         taskManager.createTask(null, message);

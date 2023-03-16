@@ -99,4 +99,11 @@ public class Server {
         this.tagsList.stream().filter(t -> t.getName().equals(tag)).findFirst().ifPresent(t -> t.addUser(follow));
     }
 
+    public void addFollower(String destName, String sender) {
+        for (User u : this.userList) {
+            if (u.getLogin().equals(destName) && !u.getFollowers().contains(sender)) {
+                u.addFollower(sender);
+            }
+        }
+    }
 }
