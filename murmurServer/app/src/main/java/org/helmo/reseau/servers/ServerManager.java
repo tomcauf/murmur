@@ -1,5 +1,6 @@
 package org.helmo.reseau.servers;
 
+import org.helmo.reseau.domains.Tag;
 import org.helmo.reseau.repositories.IServerRepositories;
 import org.helmo.reseau.clients.ClientRunnable;
 import org.helmo.reseau.domains.Server;
@@ -82,11 +83,11 @@ public class ServerManager implements Runnable{
         return null;
     }
 
-    public void addFollowedTag(String follow, String tag) {
-        server.addFollowedTag(follow, tag);
+    public boolean addFollowedTag(String follow, String tag) {
+        return server.addFollowedTag(follow, tag);
     }
-    public void addFollower(String destName, String sender) {
-        server.addFollower(destName, sender);
+    public boolean addFollower(String destName, String sender) {
+        return server.addFollower(destName, sender);
     }
 
     public void sendMessageToRelay(String s){
@@ -114,5 +115,9 @@ public class ServerManager implements Runnable{
         } catch (Exception e){
             System.out.println("[!] Error 2ServerManager.startServer: " + Arrays.toString(e.getStackTrace()));
         }
+    }
+
+    public List<String> getTags() {
+        return server.getTags();
     }
 }

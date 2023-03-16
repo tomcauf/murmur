@@ -89,21 +89,37 @@ public class Server {
         for (Tag t : this.tagsList) {
             if (t.getName().equals(tag)) {
                 System.out.println("[+] Followers of " + tag + " : " + t.getUsers());
-                return t.getUsers();
+                return new ArrayList<>(t.getUsers());
             }
         }
         return new ArrayList<>();
     }
 
-    public void addFollowedTag(String follow, String tag) {
-        this.tagsList.stream().filter(t -> t.getName().equals(tag)).findFirst().ifPresent(t -> t.addUser(follow));
+    public boolean addFollowedTag(String follow, String tag) {
+        for (Tag t : this.tagsList) {
+            if (t.getName().equals(tag) && !t.getUsers().contains(follow)) {
+                t.addUser(follow);
+                return true;
+            }
+        }
+        return false;
     }
 
-    public void addFollower(String destName, String sender) {
+    public boolean addFollower(String destName, String sender) {
         for (User u : this.userList) {
             if (u.getLogin().equals(destName) && !u.getFollowers().contains(sender)) {
                 u.addFollower(sender);
+                return true;
             }
         }
+        return false;
+    }
+
+    public List<String> getTags() {
+        List<String> tags = new ArrayList<>();
+        for (Tag t : this.tagsList) {
+            tags.add(t.getName());
+        }
+        return tags;
     }
 }

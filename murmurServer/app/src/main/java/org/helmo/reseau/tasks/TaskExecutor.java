@@ -57,10 +57,11 @@ public class TaskExecutor implements Runnable{
             if (domain.equals(serverManager.getServerDomain())) {
                 if(!source.isFollowed(follow)){
                     serverManager.addTag(name);
-                    serverManager.addFollowedTag(source.getUsername() + "@" + serverManager.getServerDomain(), name);
-                    source.addFollowedTag(follow);
-                    serverManager.saveServer();
-                    source.sendMessage(protocol.buildOk("You are now following " + follow));
+                    if(serverManager.addFollowedTag(source.getUsername() + "@" + serverManager.getServerDomain(), name)) {
+                        source.addFollowedTag(follow);
+                        serverManager.saveServer();
+                        source.sendMessage(protocol.buildOk("You are now following " + follow));
+                    }
                 }
             } else {
                 String domainInfo = currentTask.getSource().getUsername() + "@" + serverManager.getServerDomain();
@@ -98,46 +99,85 @@ public class TaskExecutor implements Runnable{
 
     }
     private void send(Task currentTask) {
-        String[] message = currentTask.getCommand();
-        String sender = message[2];
-        String destinataire = message[3];
-        String messageToSend = message[4];
-        System.out.println("MessageToSend: " + messageToSend);
-        String[] messageProto = protocol.verifyMessage(messageToSend.trim());
-        System.out.println("MessageProto: " + messageProto[0] + " " + messageProto[1]);
-        if(Objects.equals(messageProto[0], "MSGS")){
-            String destinataireName = destinataire.substring(0, destinataire.indexOf("@"));
-            ClientRunnable clientRunnable = serverManager.getClient(destinataireName);
-            if(clientRunnable != null){
-                clientRunnable.sendMessage(protocol.buildMsgs(messageProto[1], messageProto[2]));
+        try {
+            String[] message = currentTask.getCommand();
+            String sender = message[2];
+            String destinataire = message[3];
+            String messageToSend = message[4];
+            System.out.println("MessageToSend: " + messageToSend);
+            String[] messageProto = protocol.verifyMessage(messageToSend.trim());
+            System.out.println("MessageProto: " + messageProto[0] + " " + messageProto[1]);
+            if(Objects.equals(messageProto[0], "MSGS")){
+                String destinataireName = destinataire.substring(0, destinataire.indexOf("@"));
+                if(destinataireName.charAt(0) == '#') {
+                    Set<String> destinaireList = new HashSet<>();
+                    List<String> tags = retrieveTags(messageToSend);
+                    for (String tag : tags) {
+                        List<String> users = serverManager.getFollowers(tag);
+                        if(users.contains(sender)){
+                            users.remove(sender);
+                            destinaireList.addAll(users);
+                        }
+                    }
+                    for(String destinaire : destinaireList){
+                        System.out.println("[X] Destinaire: " + destinaire);
+                        String[] destinaireProto = destinaire.split("@");
+                        if(destinaireProto[1].equals(serverManager.getServerDomain())){
+                            ClientRunnable clientRunnable = serverManager.getClient(destinaireProto[0]);
+                            if(clientRunnable != null){
+                                clientRunnable.sendMessage(protocol.buildMsgs(messageProto[1], messageProto[2]));
+                            }
+                        }else{
+                            String idMessage = String.format("%d@%s",taskManager.getId(), serverManager.getServerDomain());
+                            serverManager.sendMessageToRelay(protocol.buildSend(idMessage, sender, destinaire, messageToSend));
+                        }
+                    }
+                }else{
+                    ClientRunnable clientRunnable = serverManager.getClient(destinataireName);
+                    if(clientRunnable != null){
+                        clientRunnable.sendMessage(protocol.buildMsgs(messageProto[1], messageProto[2]));
+                    }
+                }
+            }else if(Objects.equals(messageProto[0], "FOLLOW")){
+                String[] senderProto = messageProto[1].split("@");
+                System.out.println("SenderProto: " + senderProto[0] + " " + senderProto[1]);
+                if(senderProto[0].charAt(0) == '#') {
+                    String tag = senderProto[0];
+                    System.out.println("Tag: " + tag);
+                    serverManager.addTag(tag);
+                    if(serverManager.addFollowedTag(sender, tag)) {
+                        serverManager.saveServer();
+                        String ok = protocol.buildOk("You are now following " + messageProto[1]);
+                        String idMessage = String.format("%d@%s", taskManager.getId(), serverManager.getServerDomain());
+                        String messageToRelay = protocol.buildSend(idMessage, message[3], message[2], ok);
+                        serverManager.sendMessageToRelay(messageToRelay);
+                    }
+                }else{
+                    String destName = destinataire.substring(0, destinataire.indexOf("@"));
+                    if(serverManager.addFollower(destName, sender)) {
+                        serverManager.saveServer();
+                        String ok = protocol.buildOk("You are now following " + destName);
+                        String idMessage = String.format("%d@%s", taskManager.getId(), serverManager.getServerDomain());
+                        String messageToRelay = protocol.buildSend(idMessage, message[3], message[2], ok);
+                        serverManager.sendMessageToRelay(messageToRelay);
+                    }
+                }
+            }else if(Objects.equals(messageProto[0], "+OK")){
+                ClientRunnable clientRunnable = serverManager.getClient(destinataire.substring(0, destinataire.indexOf("@")));
+                if(clientRunnable != null){
+                    String[] messageSplit = messageToSend.split(" ");
+                    for (String s : messageSplit) {
+                        System.out.println("S: " + s);
+                        if(s.charAt(0) == '#'){
+                            clientRunnable.addFollowedTag(s);
+                            serverManager.saveServer();
+                            clientRunnable.sendMessage(messageToSend);
+                        }
+                    }
+                }
             }
-        }else if(Objects.equals(messageProto[0], "FOLLOW")){
-            String[] senderProto = messageProto[1].split("@");
-            System.out.println("SenderProto: " + senderProto[0] + " " + senderProto[1]);
-            if(senderProto[0].charAt(0) == '#') {
-                String tag = senderProto[0].substring(1);
-                System.out.println("Tag: " + tag);
-                serverManager.addTag(tag);
-                serverManager.addFollowedTag(sender, tag);
-                serverManager.saveServer();
-                String ok = protocol.buildOk("You are now following " + senderProto[0]);
-                String idMessage = String.format("%d@%s",taskManager.getId(), serverManager.getServerDomain());
-                String messageToRelay = protocol.buildSend(idMessage, message[3], message[2], ok);
-                serverManager.sendMessageToRelay(messageToRelay);
-            }else{
-                String destName = destinataire.substring(0, destinataire.indexOf("@"));
-                serverManager.addFollower(destName, sender);
-                serverManager.saveServer();
-                String ok = protocol.buildOk("You are now following " + destName);
-                String idMessage = String.format("%d@%s",taskManager.getId(), serverManager.getServerDomain());
-                String messageToRelay = protocol.buildSend(idMessage, message[3], message[2], ok);
-                serverManager.sendMessageToRelay(messageToRelay);
-            }
-        }else if(Objects.equals(messageProto[0], "+OK")){
-            ClientRunnable clientRunnable = serverManager.getClient(destinataire.substring(0, destinataire.indexOf("@")));
-            if(clientRunnable != null){
-                clientRunnable.sendMessage(messageToSend);
-            }
+        }catch (Exception e){
+            System.out.println("[!] TaskExecutor.send: " + e.getMessage());
         }
     }
     private void msg(Task currentTask) {
@@ -169,17 +209,26 @@ public class TaskExecutor implements Runnable{
 
     private List<String> getDestination(Task currentTask) {
         Set<String> destinataires = new HashSet<>();
-        ClientRunnable clientRunnable = currentTask.getSource();
-        destinataires.addAll(clientRunnable.getFollowers());
-        String username = clientRunnable.getUsername();
-        for (String tag : retrieveTags(currentTask.getCommand()[1])) {
-            List<String> followers = serverManager.getFollowers(tag);
-            //TODO: Doit changer
-            if (followers.contains(username + "@" + serverManager.getServerDomain())) {
-                destinataires.addAll(followers);
+        try {
+            ClientRunnable clientRunnable = currentTask.getSource();
+            destinataires.addAll(clientRunnable.getFollowers());
+            String username = clientRunnable.getUsername();
+            for (String tag : retrieveTags(currentTask.getCommand()[1])) {
+            //Est-ce que le tag appartient à mon domaine ?
+                if (serverManager.getTags().contains(tag)) {
+                    System.out.println("Tag: " + tag);
+                    destinataires.addAll(serverManager.getFollowers(tag));
+                } else {
+                    //Si non, je le relaye
+                    System.out.println("Relay Tag: " + tag);
+                    String messageToSend = protocol.buildMsgs(username + "@" + serverManager.getServerDomain(), currentTask.getCommand()[1]);
+                    serverManager.sendMessageToRelay(protocol.buildSend(String.format("%d@%s", taskManager.getId(), serverManager.getServerDomain()), username + "@" + serverManager.getServerDomain(), tag + "@server2.godswila.guru", messageToSend));
+                }
             }
+            destinataires.remove(username + "@" + serverManager.getServerDomain());
+        } catch (Exception e) {
+            System.out.println("[!] TaskExecutor.getDestination: " + e.getMessage());
         }
-        destinataires.remove(username + "@" + serverManager.getServerDomain());
         return new ArrayList<>(destinataires);
     }
 
@@ -193,7 +242,4 @@ public class TaskExecutor implements Runnable{
         }
         return tags;
     }
-
-
-
 }
