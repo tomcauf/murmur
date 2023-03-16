@@ -106,7 +106,7 @@ impl RelayManager {
 
                 let mut server_list = self.server_list.lock().unwrap();
                 server_list.insert(domain.to_string(), server_runnable);
-
+                println!("Server list: {:?}" , server_list.keys());
                 let server_runnable = server_list.get(domain).unwrap();
                 let runnable = server_runnable.clone();
                 std::thread::spawn(move || {
@@ -123,7 +123,17 @@ impl RelayManager {
         server_list.remove(&domain);
     }
     pub fn send_message(&self, domain: String, message: String){
+        println!("[*] Sending message to server: {}", domain);
         let server_list = self.server_list.lock().unwrap();
-        server_list.get(&domain).unwrap().send_message(message);
+       match server_list.get(&domain) {
+           Some(server) => {
+                println!("Server found");
+               server.add_message(message);
+           },
+           None => {
+               println!("Server not found");
+           }
+           
+       }
     }
 }
