@@ -53,7 +53,7 @@ impl ServerRunnable{
                     self.relay_manager.remove_server(self.domain.clone());
                 }
             }
-            //Vérifier si il y a un message à envoyer (self.message)
+            
             let mut message = self.message.lock().unwrap();
             if message.len() > 0 {
                 let message_to_send = message.remove(0);
@@ -62,9 +62,10 @@ impl ServerRunnable{
         }
     }
     fn handle_message(&self, message_received: &str) {
-        let message = AESCodec::decrypt(&self.base64_aes, message_received.as_bytes().to_vec()).unwrap();
-        println!("Message received: {}",message);
+        //let message = AESCodec::decrypt(&self.base64_aes, message_received.as_bytes().to_vec()).unwrap();
+        //println!("Message received: {}",message);
         let check_message = self.protocol.verify_message(message_received);
+        println!("Message received: {:?}",check_message);
         if check_message[0] == "SEND" {
             let id_domain = &check_message[1];
             let nom_domaine = &check_message[2];

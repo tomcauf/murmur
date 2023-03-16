@@ -98,7 +98,7 @@ impl Protocol {
         let rx_error = format!(r"(-ERR){}({})({}){{0,1}}", rx_esp, rx_message, rx_crlf);
         let rx_disconnect = format!(r"(DISCONNECT)({}){{0,1}}", rx_crlf);
         let rx_echo= format!(r"(ECHO){}({}){}({})({}){{0,1}}", rx_esp, rx_port, rx_esp, rx_domaine, rx_crlf);
-        let rx_send = format!("(SEND){}({}){}({}){}({}|{}){}({})", rx_esp, rx_id_domaine, rx_esp, rx_nom_domaine, rx_esp, rx_nom_domaine, rx_tag_domaine, rx_esp, rx_message_interne).to_string();
+        let rx_send = format!("(SEND){}({}){}({}|{}){}({}|{}){}({})", rx_esp, rx_id_domaine, rx_esp, rx_nom_domaine, rx_tag_domaine, rx_esp, rx_nom_domaine, rx_tag_domaine, rx_esp, rx_message_interne).to_string();
 
         let hello = format!(r"HELLO <domaine> <random22>{}", rx_crlf).to_string();
         let connect = format!(r"CONNECT <nom-utilisateur>{}", rx_crlf).to_string();
@@ -163,121 +163,6 @@ impl Protocol {
             disconnect,
             echo,
             send,
-        }
-    }
-
-    pub fn build_hello(&self, domaine: &str, random22: &str) -> String {
-        let hello_message = self.hello.replace("<domaine>", domaine).replace("<random22>", random22);
-        let regex = Regex::new(&self.rx_hello).unwrap();
-        if regex.is_match(&hello_message) {
-            hello_message
-        } else {
-            panic!("Please provide correct arguments for the construction of the HELLO message");
-        }
-    }
-
-    pub fn build_connect(&self, username: &str) -> String {
-        let connect_message = self.connect.replace("<nom-utilisateur>", username);
-        if connect_message.matches(&self.rx_connect).count() == 1 {
-            connect_message
-        } else {
-            panic!("Please provide correct argument for the construction of the CONNECT message");
-        }
-    }
-
-    pub fn build_param(&self, round: &str, salt: &str) -> String {
-        let param_message = self.param.replace("<round>", round).replace("<salt>", salt);
-        if param_message.matches(&self.rx_param).count() == 1 {
-            param_message
-        } else {
-            panic!("Please provide correct arguments for the construction of the PARAM message");
-        }
-    }
-
-    pub fn build_confirm(&self, sha3: &str) -> String {
-        let confirm_message = self.confirm.replace("<sha3>", sha3);
-        if confirm_message.matches(&self.rx_confirm).count() == 1 {
-            confirm_message
-        } else {
-            panic!("Please provide correct argument for the construction of the CONFIRM message");
-        }
-    }
-
-    pub fn build_register(&self, username: &str, salt_size: &str, bcrypt_hash: &str) -> String {
-        let register_message = self.register.replace("<nom-utilisateur>", username).replace("<salt-size>", salt_size).replace("<bcrypt-hash>", bcrypt_hash);
-        if register_message.matches(&self.rx_register).count() == 1 {
-            register_message
-        } else {
-            panic!("Please provide correct arguments for the construction of the REGISTER message");
-        }
-    }
-
-    pub fn build_follow(&self, name_or_tag_domain: &str) -> String {
-        let follow_message = self.follow.replace("<nom-ou-tag-domaine>", name_or_tag_domain);
-        if follow_message.matches(&self.rx_follow).count() == 1 {
-            follow_message
-        } else {
-            panic!("Please provide correct argument for the construction of the FOLLOW message");
-        }
-    }
-
-    pub fn build_msg(&self, message: &str) -> String {
-        let msg_message = self.msg.replace("<message>", message);
-        if msg_message.matches(&self.rx_msg).count() == 1 {
-            msg_message
-        } else {
-            panic!("Please provide correct argument for the construction of the MSG message");
-        }
-    }
-
-    pub fn build_msgs(&self, domain_name: &str, message: &str) -> String {
-        let msgs_message = self.msgs.replace("<nom-domaine>", domain_name).replace("<message>", message);
-        if msgs_message.matches(&self.rx_msgs).count() == 1 {
-            msgs_message
-        } else {
-            panic!("Please provide correct arguments for the construction of the MSGS message");
-        }
-    }
-
-    pub fn build_ok(&self, message: &str) -> String {
-        let ok_message = self.ok.replace("<message>", message);
-        if ok_message.matches(&self.rx_ok).count() == 1 {
-            ok_message
-        } else {
-            panic!("Please provide correct argument for the construction of the OK message");
-        }
-    }
-
-    pub fn build_error(&self, message: &str) -> String {
-        let error_message = self.error.replace("<message>", message);
-        if error_message.matches(&self.rx_error).count() == 1 {
-            error_message
-        } else {
-            panic!("Please provide correct argument for the construction of the ERROR message");
-        }
-    }
-
-    pub fn build_disconnect(&self) -> String {
-        self.disconnect.clone()
-    }
-
-    pub fn build_echo(&self, port: &str, domain: &str) -> String {
-        let echo_message = self.echo.replace("<port>", port).replace("<domaine>", domain);
-        let message = self.verify_message(&echo_message);
-        if message[0] == "ECHO" {
-            echo_message
-        } else {
-            panic!("Please provide correct arguments for the construction of the SEND message");
-        }
-    }
-
-    pub fn build_send(&self, id_domain: &str, domain_name: &str, name_or_tag_domain: &str, internal_message: &str) -> String {
-        let send_message = self.send.replace("<id-domaine>", id_domain).replace("<nom-domaine>", domain_name).replace("<nom-ou-tag-domaine>", name_or_tag_domain).replace("<message-interne>", internal_message);
-        let message = self.verify_message(&send_message);
-        if message[0] == "SEND" {
-            send_message
-        } else {
-            panic!("Please provide correct arguments for the construction of the SEND message");
         }
     }
 
@@ -479,17 +364,5 @@ impl Protocol {
             result.push("This SEND message is not correctly formatted".to_string());
         }
         result
-    }
-
-    fn extract_domain(&self, tag_or_domain_name: &str) -> Option<String> {
-        let regex_tag_domaine = Regex::new(&self.rx_tag_domaine).unwrap();
-        let regex_nom_domaine = Regex::new(&self.rx_nom_domaine).unwrap();
-        if let Some(captures) = regex_tag_domaine.captures(tag_or_domain_name) {
-            Some(captures[1].to_string())
-        } else if let Some(captures) = regex_nom_domaine.captures(tag_or_domain_name) {
-            Some(captures[1].to_string())
-        } else {
-            None
-        }
     }
 }
