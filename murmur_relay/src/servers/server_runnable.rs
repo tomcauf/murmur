@@ -1,6 +1,6 @@
 use std::{io::{Read, Write}, net::{SocketAddr, TcpStream}, rc::Rc, sync::{Arc, Mutex}, collections::HashMap};
 
-use crate::{relay::relay_manager::RelayManager, domains::server, grammar::protocol::Protocol, utils::aes_codec::AESCodec};
+use crate::{relay::relay_manager::RelayManager, domains::server, grammar::protocol::Protocol, utils::aes_codec::{AESCodec, self}};
 
 use aes::{Aes128, Block};
 use aes::cipher::{
@@ -41,8 +41,12 @@ impl ServerRunnable{
                 Ok(size) => {
                     let message_received = String::from_utf8_lossy(&buffer[..size]);
                     if size > 0 {
-                        println!("Message received: {}", message_received);
-                        self.handle_message(&message_received);
+                        let message_received = message_received.trim_end_matches("\r ").trim_end_matches("\n").trim_end_matches("\r\n");
+                        println!("Message received : {}", message_received);
+                        println!("Key : {}", self.base64_aes);
+                        println!("Message received size : {}", size);
+                        let message_handle = message_received.to_string().as_str().to_string();
+                        self.handle_message(&message_handle);
                     }
                 }
                 Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
@@ -57,23 +61,35 @@ impl ServerRunnable{
             let mut message = self.message.lock().unwrap();
             if message.len() > 0 {
                 let message_to_send = message.remove(0);
-                stream.write(message_to_send.as_bytes()).unwrap();
+                let aes_codec = AESCodec::new();
+                let message_encrypt = aes_codec.encrypt(&self.base64_aes, &message_to_send).unwrap();
+                let message_encrypt = format!("{}\r\n", message_encrypt);
+                let message_ecrypt = message_encrypt.as_bytes();
+                println!("Message to send : {}", message_encrypt);
+                let writerResult = stream.write(message_ecrypt).unwrap();
+                stream.flush().unwrap();
+                if writerResult == 0 {
+                    println!("[!] Error sending message");
+                } else if writerResult != message_encrypt.len() {
+                    println!("[!] Error sending message");
+                } else {
+                    println!("[*] Message sent");
+                }
             }
         }
     }
     fn handle_message(&self, message_received: &str) {
-        //let message = AESCodec::decrypt(&self.base64_aes, message_received.as_bytes().to_vec()).unwrap();
-        //println!("Message received: {}",message);
-        let check_message = self.protocol.verify_message(message_received);
-        println!("Message received: {:?}",check_message);
+        //Le message_received peut surement avoir un caractère de fin de ligne (comme \r ou \n ou les deux). Il faut donc le supprimer
+    
+        let aes_codec = AESCodec::new();
+        let message = aes_codec.decrypt(&self.base64_aes, message_received.as_bytes().to_vec()).unwrap();
+        println!("Message received : {}", message);
+        let check_message = self.protocol.verify_message(&message);
         if check_message[0] == "SEND" {
-            let id_domain = &check_message[1];
-            let nom_domaine = &check_message[2];
             let nom_tag_domaine = &check_message[3];
-            let message = &check_message[4];
             let mut nom_tag_domaine_split = nom_tag_domaine.split("@");
             let domaine_to_send = nom_tag_domaine_split.nth(1).unwrap();
-            self.relay_manager.send_message(domaine_to_send.to_string(), message_received.to_string());
+            self.relay_manager.send_message(domaine_to_send.to_string(), message.to_string());
         }
     }
     pub fn add_message(&self, new_message : String){

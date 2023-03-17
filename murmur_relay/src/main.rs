@@ -1,8 +1,8 @@
-use std::path::Path;
+use std::{path::Path, result};
 use grammar::protocol::Protocol;
 use infrastructures::json_repositories::JsonRepositories;
 use relay::{relay_manager::RelayManager};
-use utils::net_chooser::NetChooser;
+use utils::{net_chooser::NetChooser, aes_codec::AESCodec};
 
 mod domains;
 mod grammar;
@@ -24,9 +24,14 @@ fn main() {
         Protocol::new(),
     );
     relay_manager.start();
-    /*let protocol = Protocol::new();
-    let messageProtocol = protocol.build_send("1@server1.godswila.guru","maxime123@server1.godswila.guru","maxime345@server2.godswila.guru","COUCOU JE SUIS LE MESSAGE du serveur 1");
 
-    let messageTab = protocol.verify_message(&messageProtocol);
-    println!("Message : {}",messageTab[0]); */
+    /*let message = "k9Ut583O2/8os1u+MeLfBknJaxzvhAyU4YHcYR9eNUZMWNxUXPA7+QEaPSigz/shxOo7KeoNxobWFje9yasRQlY8YkY/qgXMeGV2MhQrxA2UqCnLJu26EMh/vsI2wqMufawSQFK8r0xeyH6QYVSeENwfV6QgnQ/QHYFqSuNxLwYJNbLTMQsLHxhp1eS7n/X4/w==qymu4sdMvjUIYb5T";
+
+    let aes_codec = AESCodec::new();
+
+    let result = aes_codec.decrypt("OpoyGQKQL66hSkxw50UMWeR3BcN2M+2PgKGvszDVuCE=",message.as_bytes().to_vec());
+
+    let result = aes_codec.encrypt("OpoyGQKQL66hSkxw50UMWeR3BcN2M+2PgKGvszDVuCE=", "SEND 1@server2.godswila.guru swilabus@server2.godswila.guru lswinnen@server1.godswila.guru FOLLOW lswinnen@server1.godswila.guru");
+
+    println!("Result : {:?}", result);*/
 }
