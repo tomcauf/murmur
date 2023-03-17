@@ -3,16 +3,16 @@ package org.helmo.reseau.infrastructures.dto;
 import java.util.List;
 
 public class ServerDto {
-    private String currentDomain;
-    private int saltSizeInBytes;
-    private String multicastAddress;
-    private int multicastPort;
-    private int unicastPort;
-    private int relayPort;
-    private String base64AES;
-    private boolean tls;
-    private List<UserDto> users;
-    private List<TagDto> tags;
+    private final String currentDomain;
+    private final int saltSizeInBytes;
+    private final String multicastAddress;
+    private final int multicastPort;
+    private final int unicastPort;
+    private final int relayPort;
+    private final String base64AES;
+    private final boolean tls;
+    private final List<UserDto> users;
+    private final List<TagDto> tags;
 
     public ServerDto(String domain, int saltSizeInBytes, String multicastAddress, int multicastPort, int unicastPort, int relayPort, String base64AES, boolean tls, List<UserDto> users, List<TagDto> tags) {
         this.currentDomain = domain;

@@ -19,12 +19,12 @@ import java.util.Collections;
 import java.util.List;
 
 public class ServerManager implements Runnable{
-    private IServerRepositories repositories;
-    private TLSSocketFactory tlsSocketFactory;
-    private TaskManager taskManager;
-    private List<ClientRunnable> clientList;
-    private Server server;
-    private RelayManager relayManager;
+    private final IServerRepositories repositories;
+    private final TLSSocketFactory tlsSocketFactory;
+    private final TaskManager taskManager;
+    private final List<ClientRunnable> clientList;
+    private final Server server;
+    private final RelayManager relayManager;
 
     public ServerManager(IServerRepositories repositories, TLSSocketFactory tlsSocketFactory, TaskManager taskManager, RelayManager relayManager){
         this.repositories = repositories;
@@ -117,7 +117,6 @@ public class ServerManager implements Runnable{
                 clientList.add(client);
                 (new Thread(client)).start();
             }
-
         } catch (IOException e){
             System.out.println("[!] Error 1ServerManager.startServer: " + e.getMessage());
         } catch (Exception e){

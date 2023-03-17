@@ -16,12 +16,12 @@ public class NetChooser {
         loadInterfaces();
         Scanner console = new Scanner(System.in);
         String[] allInterfaceNames = getInterfaces();
-        for(int index=0; index < allInterfaceNames.length; ++index) {
+        for (int index = 0; index < allInterfaceNames.length; ++index) {
             System.out.printf("%d. %s\n", index, allInterfaceNames[index]);
         }
-        System.out.printf("Select your interface :");
+        System.out.printf("[*] Select your interface :");
         selectedInterface = getInterfacesByIndex(console.nextInt());
-        System.out.printf("Selected interface: %s\n", selectedInterface.getDisplayName());
+        System.out.printf("[+] Selected interface: %s\n", selectedInterface.getDisplayName());
 
     }
 
@@ -33,14 +33,14 @@ public class NetChooser {
                 NetworkInterface currentInterface = discoveredInterfaces.nextElement();
                 Enumeration<InetAddress> inetAddresses = currentInterface.getInetAddresses();
                 int ipCount = 0;
-                while(inetAddresses.hasMoreElements()) {
+                while (inetAddresses.hasMoreElements()) {
                     InetAddress currentAddress = inetAddresses.nextElement();
                     ipCount++;
                 }
-                if(ipCount > 0)
+                if (ipCount > 0)
                     interfaces.add(currentInterface);
             }
-        } catch(SocketException ex) {
+        } catch (SocketException ex) {
             ex.printStackTrace();
         }
 
@@ -51,14 +51,15 @@ public class NetChooser {
     }
 
     public NetworkInterface getInterfacesByIndex(int i) {
-        if(i >= 0)
+        if (i >= 0) {
             return interfaces.get(i);
-        else
+        } else {
             return null;
+        }
     }
 
     public String[] getInterfaces() {
-        if(interfaces.size() > 0) {
+        if (interfaces.size() > 0) {
             String[] result = new String[interfaces.size()];
             for (int i = 0; i < interfaces.size(); ++i) {
                 result[i] = interfaces.get(i).getDisplayName();

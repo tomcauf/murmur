@@ -6,45 +6,37 @@ import org.helmo.reseau.grammar.Protocol;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 
-public class MulticastRunnable implements Runnable{
+public class MulticastRunnable implements Runnable {
 
-    private Server server;
-    private NetworkInterface si;
+    private final Server server;
+    private final NetworkInterface networkInterface;
 
-    public MulticastRunnable(Server server, NetworkInterface si) {
+    public MulticastRunnable(Server server, NetworkInterface networkInterface) {
         this.server = server;
-        this.si = si;
+        this.networkInterface = networkInterface;
     }
 
     @Override
     public void run() {
-
-
-        System.out.println("Cocou  c est multicast runnable");
-
-
-
         Protocol p = new Protocol();
-
         try {
+            String echoMessage = p.buildEcho(String.valueOf(server.getRelayPort()), server.getDomain());
+            InetAddress multicastAddress = InetAddress.getByName(server.getMulticastAddress());
+            InetSocketAddress group = new InetSocketAddress(multicastAddress, server.getMulticastPort());
+            MulticastSocket socket = new MulticastSocket(server.getMulticastPort());
 
-            String msg = p.buildEcho(String.valueOf(server.getRelayPort()),server.getDomain());
-            InetAddress mcastaddr = InetAddress.getByName(server.getMulticastAddress());
-            InetSocketAddress group = new InetSocketAddress(mcastaddr, server.getMulticastPort());
-            MulticastSocket s = new MulticastSocket(server.getMulticastPort());
+            // Joindre le groupe multicast en utilisant une adresse IP et un port
+            socket.joinGroup(group, networkInterface);
 
-            s.joinGroup(new InetSocketAddress(mcastaddr, 0), si);
-            byte[] msgBytes = msg.getBytes(StandardCharsets.UTF_8);
-            DatagramPacket hi = new DatagramPacket(msgBytes, msgBytes.length, group);
+            byte[] msgBytes = echoMessage.getBytes(StandardCharsets.UTF_8);
+            DatagramPacket packet = new DatagramPacket(msgBytes, msgBytes.length, group);
 
-            while(true) {
-                s.send(hi);
+            while (true) {
+                socket.send(packet);
                 Thread.sleep(15000);
             }
-            /*s.leaveGroup(group, selectedInterface);*/
-        } catch(Exception e) {
-            System.out.println("Erreur : " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("[!] Erreur Multicast : " + e.getMessage());
         }
-
     }
 }

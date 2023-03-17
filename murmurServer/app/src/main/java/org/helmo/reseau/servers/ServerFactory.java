@@ -16,17 +16,17 @@ public class ServerFactory {
 
     public ServerFactory(String configFileName, String certificateFileName, String certificatePassword, NetworkInterface selectedInterface) {
         String resourceFolder;
-        if(Paths.get("").toAbsolutePath().toString().contains("app")) {
-            resourceFolder = Paths.get("","src","main","resources").toAbsolutePath().toString();
+        if (Paths.get("").toAbsolutePath().toString().contains("app")) {
+            resourceFolder = Paths.get("", "src", "main", "resources").toAbsolutePath().toString();
         } else {
-            resourceFolder = Paths.get("","app","src","main","resources").toAbsolutePath().toString();
+            resourceFolder = Paths.get("", "app", "src", "main", "resources").toAbsolutePath().toString();
         }
 
         String configPath = Paths.get(resourceFolder, "config").toString();
         IServerRepositories repositories = new ServerRepositories(configPath, configFileName, new ServerMapper());
 
         Server server = repositories.getServer();
-        if(server== null) {
+        if (server == null) {
             System.out.println("[!] Error: server is null");
             return;
         }
@@ -37,18 +37,18 @@ public class ServerFactory {
         TaskManager taskManager = new TaskManager();
 
 
-        relayManager = new RelayManager(repositories,taskManager,selectedInterface);
-        serverManager = new ServerManager(repositories, tlsSocketFactory, taskManager,relayManager);
+        relayManager = new RelayManager(repositories, taskManager, selectedInterface);
+        serverManager = new ServerManager(repositories, tlsSocketFactory, taskManager, relayManager);
 
 
     }
 
     public void start() {
-        if(serverManager != null) {
+        if (serverManager != null) {
             (new Thread(serverManager)).start();
-            (new Thread (relayManager)).start();
+            (new Thread(relayManager)).start();
 
-        }else{
+        } else {
             System.out.println("[!] Error: serverManager is null");
         }
     }

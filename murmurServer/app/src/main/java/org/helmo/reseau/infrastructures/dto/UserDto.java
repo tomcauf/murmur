@@ -3,13 +3,13 @@ package org.helmo.reseau.infrastructures.dto;
 import java.util.List;
 
 public class UserDto {
-    private String login;
-    private String bcryptHash;
-    private int bcryptRound;
-    private String bcryptSalt;
-    private List<String> followers;
-    private List<String> userTags;
-    private int lockoutCounter;
+    private final String login;
+    private final String bcryptHash;
+    private final int bcryptRound;
+    private final String bcryptSalt;
+    private final List<String> followers;
+    private final List<String> userTags;
+    private final int lockoutCounter;
 
     public UserDto(String login, String bcryptHash, int bcryptRound, String bcryptSalt, List<String> followers, List<String> userTags, int lockoutCounter) {
         this.login = login;
@@ -20,6 +20,7 @@ public class UserDto {
         this.userTags = userTags;
         this.lockoutCounter = lockoutCounter;
     }
+
     public String getLogin() {
         return login;
     }

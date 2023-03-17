@@ -5,6 +5,7 @@ import org.helmo.reseau.grammar.Protocol;
 import org.helmo.reseau.relay.multicast.MulticastRunnable;
 import org.helmo.reseau.repositories.IServerRepositories;
 import org.helmo.reseau.tasks.TaskManager;
+import org.helmo.reseau.utils.AESEncryption;
 
 import java.io.IOException;
 import java.net.NetworkInterface;
@@ -14,21 +15,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class RelayManager implements Runnable{
+public class RelayManager implements Runnable {
     private final Server server;
-    private TaskManager taskManager;
-    private IServerRepositories repo;
-    private  NetworkInterface si;
-
+    private final TaskManager taskManager;
+    private final IServerRepositories repo;
+    private final NetworkInterface networkInterface;
     private RelayRunnable relayRunnable;
-
-    private List<String> idMessages;
+    private final List<String> idMessages;
 
     public RelayManager(IServerRepositories repositories, TaskManager taskManager, NetworkInterface selectedInterface) {
         this.taskManager = taskManager;
         this.repo = repositories;
         this.server = repositories.getServer();
-        this.si = selectedInterface;
+        this.networkInterface = selectedInterface;
         idMessages = Collections.synchronizedList(new ArrayList<>());
     }
 
@@ -40,24 +39,23 @@ public class RelayManager implements Runnable{
         idMessages.add(idMessage);
     }
 
-     public void sendMessageToRelay(String message){
+    public void sendMessageToRelay(String message) {
         if (relayRunnable != null) {
             relayRunnable.sendMessage(message);
-        }else{
-            System.out.println("Relay not connected");
+        } else {
+            System.out.println("[!] Relay not connected");
         }
-     }
+    }
 
     @Override
     public void run() {
         Protocol protocol = new Protocol();
-        MulticastRunnable multicastRunnable = new MulticastRunnable(server,si);
-        try {
-            ServerSocket serverSocket = new ServerSocket(server.getRelayPort());
-            new Thread( multicastRunnable).start();
+        MulticastRunnable multicastRunnable = new MulticastRunnable(server, networkInterface);
+        try (ServerSocket serverSocket = new ServerSocket(server.getRelayPort())) {
+            new Thread(multicastRunnable).start();
             while (true) {
                 Socket relaySocket = serverSocket.accept();
-                relayRunnable = new RelayRunnable(taskManager,protocol,relaySocket,this);
+                relayRunnable = new RelayRunnable(taskManager, protocol, relaySocket, this, new AESEncryption(repo.getServer().getBase64AES()));
                 System.out.println("[*] Relay connected");
                 (new Thread(relayRunnable)).start();
             }

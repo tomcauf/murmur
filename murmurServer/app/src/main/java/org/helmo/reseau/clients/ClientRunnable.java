@@ -13,9 +13,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ClientRunnable implements Runnable, Closeable {
-    private SSLSocket clientSocket;
-    private ServerManager serverManager;
-    private Protocol protocol;
+    private final SSLSocket clientSocket;
+    private final ServerManager serverManager;
+    private final Protocol protocol;
     private User user;
     private BufferedReader in;
     private PrintWriter out;
@@ -56,10 +56,9 @@ public class ClientRunnable implements Runnable, Closeable {
     }
 
     private void handleMessage(String msg) {
-        System.out.println("[*] C | Message: " + msg);
+        System.out.println("[C] Message: " + msg);
         String[] message = protocol.verifyMessage(msg);
-        //TODO: Voir avec le prof si je peux le mettre directement ici
-        if(message[0].equals("DISCONNECT")) {
+        if (message[0].equals("DISCONNECT")) {
             sendMessage(protocol.buildOk("Disconnecting"));
             serverManager.closeClient(this);
         } else if (message[0].equals("-ERR") && !isAuthentified) {

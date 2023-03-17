@@ -12,7 +12,7 @@ public class Protocol {
     private final String RX_CRLF = "\\x0d\\x0a"; // OU => \\r\\n
     private final String RX_SYMBOLE = "[\\x21-\\x2f\\x3a-\\x40\\x5b-\\x60]";
     private final String RX_ESP = "\\x20";
-    private final String RX_DOMAINE = String.format("[%s%s]{5,200}", RX_LETTRE_CHIFFRE,"\\x2e");
+    private final String RX_DOMAINE = String.format("[%s%s]{5,200}", RX_LETTRE_CHIFFRE, "\\x2e");
     private final String RX_PORT = String.format("[%s]{1,5}", RX_CHIFFRE);
     private final String RX_ROUND = String.format("[%s]{2}", RX_CHIFFRE);
     private final String RX_BCRYPT_HASH = String.format("\\$2b\\$%s\\$[%s%s]{1,70}", RX_ROUND, RX_LETTRE_CHIFFRE, RX_SYMBOLE);
@@ -45,7 +45,7 @@ public class Protocol {
     private final String RX_ECHO = String.format("(ECHO)%s(%s)%s(%s)(%s){0,1}", RX_ESP, RX_PORT, RX_ESP, RX_DOMAINE, RX_CRLF);
 
     // Echanges unicast entre Murmur Server et Murmur Relay :
-    private final String RX_SEND = String.format("(SEND)%s(%s)%s(%s|%s)%s(%s|%s)%s(%s)(%s){0,1}", RX_ESP, RX_ID_DOMAINE, RX_ESP, RX_NOM_DOMAINE, RX_TAG_DOMAINE ,RX_ESP, RX_NOM_DOMAINE, RX_TAG_DOMAINE, RX_ESP, RX_MESSAGE_INTERNE, RX_CRLF);
+    private final String RX_SEND = String.format("(SEND)%s(%s)%s(%s|%s)%s(%s|%s)%s(%s)(%s){0,1}", RX_ESP, RX_ID_DOMAINE, RX_ESP, RX_NOM_DOMAINE, RX_TAG_DOMAINE, RX_ESP, RX_NOM_DOMAINE, RX_TAG_DOMAINE, RX_ESP, RX_MESSAGE_INTERNE, RX_CRLF);
     // Messages pour la construction :
     private final String HELLO = "HELLO <domaine> <random22>";
     private final String CONNECT = "CONNECT <nom-utilisateur>";
@@ -61,72 +61,29 @@ public class Protocol {
     private final String ECHO = "ECHO <port> <domaine>";
     private final String SEND = "SEND <id-domaine> <nom-domaine> <nom-ou-tag-domaine> <message-interne>";
 
-    public String buildHello(String domaine,String random22) {
-        String helloMessage = HELLO.replaceAll("<domaine>",domaine).replaceAll("<random22>",random22);
-        if(helloMessage.matches(RX_HELLO)) {
+    public String buildHello(String domaine, String random22) {
+        String helloMessage = HELLO.replaceAll("<domaine>", domaine).replaceAll("<random22>", random22);
+        if (helloMessage.matches(RX_HELLO)) {
             return helloMessage;
         } else {
             throw new IllegalArgumentException("Please provide correct arguments for the construction of the HELLO message");
         }
     }
 
-    public String buildConnect(String username) {
-        String connectMessage = CONNECT.replaceAll("<nom-utilisateur>",username);
-        if(connectMessage.matches(RX_CONNECT)) {
-            return connectMessage;
-        } else {
-            throw new IllegalArgumentException("Please provide correct argument for the construction of the CONNECT message");
-        }
-    }
 
-    public String buildParam(String round,String salt) {
-        String paramMessage = PARAM.replaceAll("<round>",round).replaceAll("<salt>",salt);
-        if(paramMessage.matches(RX_PARAM)) {
+    public String buildParam(String round, String salt) {
+        String paramMessage = PARAM.replaceAll("<round>", round).replaceAll("<salt>", salt);
+        if (paramMessage.matches(RX_PARAM)) {
             return paramMessage;
         } else {
             throw new IllegalArgumentException("Please provide correct arguments for the construction of the PARAM message");
         }
     }
 
-    public String buildConfirm(String sha3) {
-        String confirmMessage = CONFIRM.replaceAll("<sha3>",sha3);
-        if(confirmMessage.matches(RX_CONFIRM)) {
-            return confirmMessage;
-        } else {
-            throw new IllegalArgumentException("Please provide correct argument for the construction of the CONFIRM message");
-        }
-    }
 
-    public String buildRegister(String username,String saltSize,String bcryptHash) {
-        String registerMessage = REGISTER.replaceAll("<nom-utilisateur>",username).replaceAll("<salt-size>",saltSize).replaceAll("<bcrypt-hash>",bcryptHash);
-        if(registerMessage.matches(RX_REGISTER)) {
-            return registerMessage;
-        } else {
-            throw new IllegalArgumentException("Please provide correct arguments for the construction of the REGISTER message");
-        }
-    }
-
-    public String buildFollow(String nameOrTagDomain) {
-        String followMessage = FOLLOW.replaceAll("<nom-ou-tag-domaine>",nameOrTagDomain);
-        if(followMessage.matches(RX_FOLLOW)) {
-            return followMessage;
-        } else {
-            throw new IllegalArgumentException("Please provide correct argument for the construction of the FOLLOW message");
-        }
-    }
-
-    public String buildMsg(String message) {
-        String msgMessage = MSG.replaceAll("<message>",message);
-        if(msgMessage.matches(RX_MSG)) {
-            return msgMessage;
-        } else {
-            throw new IllegalArgumentException("Please provide correct argument for the construction of the MSG message");
-        }
-    }
-
-    public String buildMsgs(String domainName,String message) {
-        String msgsMessage = MSGS.replaceAll("<nom-domaine>",domainName).replaceAll("<message>",message);
-        if(msgsMessage.matches(RX_MSGS)) {
+    public String buildMsgs(String domainName, String message) {
+        String msgsMessage = MSGS.replaceAll("<nom-domaine>", domainName).replaceAll("<message>", message);
+        if (msgsMessage.matches(RX_MSGS)) {
             return msgsMessage;
         } else {
             throw new IllegalArgumentException("Please provide correct arguments for the construction of the MSGS message");
@@ -134,8 +91,8 @@ public class Protocol {
     }
 
     public String buildOk(String message) {
-        String okMessage = OK.replaceAll("<message>",message);
-        if(okMessage.matches(RX_OK)) {
+        String okMessage = OK.replaceAll("<message>", message);
+        if (okMessage.matches(RX_OK)) {
             return okMessage;
         } else {
             throw new IllegalArgumentException("Please provide correct argument for the construction of the OK message");
@@ -143,37 +100,34 @@ public class Protocol {
     }
 
     public String buildError(String message) {
-        String errorMessage = ERROR.replaceAll("<message>",message);
-        if(errorMessage.matches(RX_ERROR)) {
+        String errorMessage = ERROR.replaceAll("<message>", message);
+        if (errorMessage.matches(RX_ERROR)) {
             return errorMessage;
         } else {
             throw new IllegalArgumentException("Please provide correct argument for the construction of the ERROR message");
         }
     }
 
-    public String buildDisconnect() {
-        return DISCONNECT;
-    }
 
-    public String buildEcho(String port,String domain) {
-        String echoMessage = ECHO.replace("<port>",port).replaceAll("<domaine>",domain);
-        if(echoMessage.matches(RX_ECHO)) {
+    public String buildEcho(String port, String domain) {
+        String echoMessage = ECHO.replace("<port>", port).replaceAll("<domaine>", domain);
+        if (echoMessage.matches(RX_ECHO)) {
             return echoMessage;
         } else {
             throw new IllegalArgumentException("Please provide correct arguments for the construction of the ECHO message");
         }
     }
 
-    public String buildSend(String idDomain,String domainName,String nameOrTagDomain,String internalMessage) {
-        String sendMessage = SEND.replaceAll("<id-domaine>",idDomain).replaceAll("<nom-domaine>",domainName).replaceAll("<nom-ou-tag-domaine>",nameOrTagDomain).replaceAll("<message-interne>",internalMessage);
-        if(sendMessage.matches(RX_SEND)) {
+    public String buildSend(String idDomain, String domainName, String nameOrTagDomain, String internalMessage) {
+        String sendMessage = SEND.replaceAll("<id-domaine>", idDomain).replaceAll("<nom-domaine>", domainName).replaceAll("<nom-ou-tag-domaine>", nameOrTagDomain).replaceAll("<message-interne>", internalMessage);
+        if (sendMessage.matches(RX_SEND)) {
             return sendMessage;
         } else {
             throw new IllegalArgumentException("Please provide correct arguments for the construction of the SEND message");
         }
     }
 
-    public String[] verifyMessage(String message){
+    public String[] verifyMessage(String message) {
         if (message != null) {
             switch (message.split(" ")[0].trim()) {
                 case "HELLO" -> {
@@ -220,7 +174,7 @@ public class Protocol {
                 }
             }
         } else {
-            return new String[]{"-ERR","The message must be NOT NULL"};
+            return new String[]{"-ERR", "The message must be NOT NULL"};
         }
     }
 
@@ -228,128 +182,128 @@ public class Protocol {
         Pattern p = Pattern.compile(RX_HELLO);
         Matcher m = p.matcher(message);
 
-        if(m.matches()) {
-            return new String[]{m.group(1),m.group(2),m.group(3)};
+        if (m.matches()) {
+            return new String[]{m.group(1), m.group(2), m.group(3)};
         }
-        return new String[]{"-ERR","This HELLO message is not correctly formatted"};
+        return new String[]{"-ERR", "This HELLO message is not correctly formatted"};
     }
 
     private String[] verifyConnect(String message) {
         Pattern p = Pattern.compile(RX_CONNECT);
         Matcher m = p.matcher(message);
 
-        if(m.matches()) {
-            return new String[]{m.group(1),m.group(2)};
+        if (m.matches()) {
+            return new String[]{m.group(1), m.group(2)};
         }
-        return new String[]{"-ERR","This CONNECT message is not correctly formatted"};
+        return new String[]{"-ERR", "This CONNECT message is not correctly formatted"};
     }
 
     private String[] verifyParam(String message) {
         Pattern p = Pattern.compile(RX_PARAM);
         Matcher m = p.matcher(message);
 
-        if(m.matches()) {
-            return new String[]{m.group(1),m.group(2),m.group(3)};
+        if (m.matches()) {
+            return new String[]{m.group(1), m.group(2), m.group(3)};
         }
-        return new String[]{"-ERR","This PARAM message is not correctly formatted"};
+        return new String[]{"-ERR", "This PARAM message is not correctly formatted"};
     }
 
     private String[] verifyConfirm(String message) {
         Pattern p = Pattern.compile(RX_CONFIRM);
         Matcher m = p.matcher(message);
 
-        if(m.matches()) {
-            return new String[]{m.group(1),m.group(2)};
+        if (m.matches()) {
+            return new String[]{m.group(1), m.group(2)};
         }
-        return new String[]{"-ERR","This CONFIRM message is not correctly formatted"};
+        return new String[]{"-ERR", "This CONFIRM message is not correctly formatted"};
     }
 
     private String[] verifyRegister(String message) {
         Pattern p = Pattern.compile(RX_REGISTER);
         Matcher m = p.matcher(message);
 
-        if(m.matches()) {
-            return new String[]{m.group(1),m.group(2),m.group(3),m.group(4)};
+        if (m.matches()) {
+            return new String[]{m.group(1), m.group(2), m.group(3), m.group(4)};
         }
-        return new String[]{"-ERR","This REGISTER message is not correctly formatted"};
+        return new String[]{"-ERR", "This REGISTER message is not correctly formatted"};
     }
 
     private String[] verifyFollow(String message) {
         Pattern p = Pattern.compile(RX_FOLLOW);
         Matcher m = p.matcher(message);
 
-        if(m.matches()) {
-            return new String[]{m.group(1),m.group(2)};
+        if (m.matches()) {
+            return new String[]{m.group(1), m.group(2)};
         }
-        return new String[]{"-ERR","This FOLLOW message is not correctly formatted"};
+        return new String[]{"-ERR", "This FOLLOW message is not correctly formatted"};
     }
 
     private String[] verifyMsg(String message) {
         Pattern p = Pattern.compile(RX_MSG);
         Matcher m = p.matcher(message);
 
-        if(m.matches()) {
-            return new String[]{m.group(1),m.group(2)};
+        if (m.matches()) {
+            return new String[]{m.group(1), m.group(2)};
         }
-        return new String[]{"-ERR","This MSG message is not correctly formatted"};
+        return new String[]{"-ERR", "This MSG message is not correctly formatted"};
     }
 
     private String[] verifyMsgs(String message) {
         Pattern p = Pattern.compile(RX_MSGS);
         Matcher m = p.matcher(message);
 
-        if(m.matches()) {
-            return new String[]{m.group(1),m.group(2),m.group(3)};
+        if (m.matches()) {
+            return new String[]{m.group(1), m.group(2), m.group(3)};
         }
-        return new String[]{"-ERR","This MSGS message is not correctly formatted"};
+        return new String[]{"-ERR", "This MSGS message is not correctly formatted"};
     }
 
     private String[] verifyOk(String message) {
         Pattern p = Pattern.compile(RX_OK);
         Matcher m = p.matcher(message);
 
-        if(m.matches()) {
-            return new String[]{m.group(1),m.group(2)};
+        if (m.matches()) {
+            return new String[]{m.group(1), m.group(2)};
         }
-        return new String[]{"-ERR","This OK message is not correctly formatted"};
+        return new String[]{"-ERR", "This OK message is not correctly formatted"};
     }
 
     private String[] verifyError(String message) {
         Pattern p = Pattern.compile(RX_ERROR);
         Matcher m = p.matcher(message);
 
-        if(m.matches()) {
-            return new String[]{m.group(1),m.group(2)};
+        if (m.matches()) {
+            return new String[]{m.group(1), m.group(2)};
         }
-        return new String[]{"-ERR","This ERROR message is not correctly formatted"};
+        return new String[]{"-ERR", "This ERROR message is not correctly formatted"};
     }
 
     private String[] verifyDisconnect(String message) {
         Pattern p = Pattern.compile(RX_DISCONNECT);
         Matcher m = p.matcher(message);
 
-        if(m.matches()) {
+        if (m.matches()) {
             return new String[]{m.group(1)};
         }
-        return new String[]{"-ERR","This DISCONNECT message is not correctly formatted"};
+        return new String[]{"-ERR", "This DISCONNECT message is not correctly formatted"};
     }
 
     private String[] verifyEcho(String message) {
         Pattern p = Pattern.compile(RX_ECHO);
         Matcher m = p.matcher(message);
 
-        if(m.matches()) {
-            return new String[]{m.group(1),m.group(2),m.group(3)};
+        if (m.matches()) {
+            return new String[]{m.group(1), m.group(2), m.group(3)};
         }
-        return new String[]{"-ERR","This ECHO message is not correctly formatted"};
+        return new String[]{"-ERR", "This ECHO message is not correctly formatted"};
     }
 
     private String[] verifySend(String message) {
         Pattern p = Pattern.compile(RX_SEND);
         Matcher m = p.matcher(message);
-        if(m.matches()) {
-            return new String[]{m.group(1),m.group(2),m.group(3),m.group(5),m.group(7)};
+        if (m.matches()) {
+            return new String[]{m.group(1), m.group(2), m.group(3), m.group(5), m.group(7)};
         }
-        return new String[]{"-ERR","This SEND message is not correctly formatted"};
+        return new String[]{"-ERR", "This SEND message is not correctly formatted"};
     }
 }

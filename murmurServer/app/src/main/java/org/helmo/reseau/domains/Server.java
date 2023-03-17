@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Server {
-    private String domain;
-    private int saltSizeInBytes;
-    private String multicastAddress;
-    private int multicastPort;
-    private int unicastPort;
-    private int relayPort;
-    private String base64AES;
-    private boolean tls;
-    private List<User> userList;
-    private List<Tag> tagsList;
+    private final String domain;
+    private final int saltSizeInBytes;
+    private final String multicastAddress;
+    private final int multicastPort;
+    private final int unicastPort;
+    private final int relayPort;
+    private final String base64AES;
+    private final boolean tls;
+    private final List<User> userList;
+    private final List<Tag> tagsList;
 
     public Server(String domain, int saltSizeInBytes, String multicastAddress, int multicastPort, int unicastPort, int relayPort, String base64AES, boolean tls, List<User> userList, List<Tag> tagsList) {
         this.domain = domain;
@@ -35,16 +35,19 @@ public class Server {
     public void addUser(User user) {
         this.userList.add(user);
     }
+
     public void addTag(String name) {
         this.tagsList.add(new Tag(name, new ArrayList<>()));
     }
-    public boolean hasUser(User user){
-        //TODO: Vérifier avec contains (mdp différent ou quoi) : return this.userList.contains(user);
+
+    public boolean hasUser(User user) {
         return this.userList.stream().anyMatch(u -> u.getLogin().equals(user.getLogin()));
     }
-    public boolean hasTag(String name){
+
+    public boolean hasTag(String name) {
         return this.tagsList.stream().anyMatch(t -> t.getName().equals(name));
     }
+
     public int getUnicastPort() {
         return unicastPort;
     }

@@ -4,9 +4,9 @@ import org.helmo.reseau.clients.ClientRunnable;
 
 public class Task {
     private int id;
-    private String type;
-    private ClientRunnable source;
-    private String[] command;
+    private final String type;
+    private final ClientRunnable source;
+    private final String[] command;
     private StatusOfTask status;
     public Task(int id, String type, ClientRunnable source, String[] command, StatusOfTask status) {
         this.id = id;
@@ -14,10 +14,6 @@ public class Task {
         this.source = source;
         this.command = command;
         this.status = status;
-    }
-
-    public int getId() {
-        return id;
     }
 
     public String getType() {
@@ -30,10 +26,6 @@ public class Task {
 
     public String[] getCommand() {
         return command;
-    }
-
-    public StatusOfTask getStatus() {
-        return status;
     }
 
     public void setStatus(StatusOfTask status) {
