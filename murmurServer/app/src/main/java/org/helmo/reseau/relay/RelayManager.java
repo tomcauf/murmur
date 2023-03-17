@@ -1,14 +1,11 @@
-package org.helmo.reseau.servers;
+package org.helmo.reseau.relay;
 
-import org.helmo.reseau.clients.ClientRunnable;
 import org.helmo.reseau.domains.Server;
 import org.helmo.reseau.grammar.Protocol;
-import org.helmo.reseau.multicast.MulticastRunnable;
+import org.helmo.reseau.relay.multicast.MulticastRunnable;
 import org.helmo.reseau.repositories.IServerRepositories;
-import org.helmo.reseau.relay.RelayRunnable;
 import org.helmo.reseau.tasks.TaskManager;
 
-import javax.net.ssl.SSLSocket;
 import java.io.IOException;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;

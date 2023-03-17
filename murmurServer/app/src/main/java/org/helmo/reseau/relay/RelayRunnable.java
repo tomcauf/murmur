@@ -1,7 +1,6 @@
 package org.helmo.reseau.relay;
 
 import org.helmo.reseau.grammar.Protocol;
-import org.helmo.reseau.servers.RelayManager;
 import org.helmo.reseau.tasks.TaskManager;
 
 import java.io.*;
@@ -46,15 +45,18 @@ public class RelayRunnable implements Runnable{
                 //decrypt
 
                 String[] message = protocol.verifyMessage(msg);
-
                 if (message[0].equals("SEND") ) {
                     StringBuilder sb = new StringBuilder();
                     for (String s : message) {
                         sb.append(s).append(" ");
                     }
+                    System.out.println("[*] R | Message: " + sb.toString());
                     if(!relayManager.checkIfIdMessageExists(message[1])) {
+                        System.out.println("[*] R | Message: " + sb.toString());
                         relayManager.addIdMessage(message[1]);
+                        System.out.println("[*] R | Message: " + sb.toString());
                         taskManager.createTask(null, message);
+                        System.out.println("[*] R | Message: " + sb.toString());
                     }
                 }
 

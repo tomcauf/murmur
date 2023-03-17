@@ -1,6 +1,6 @@
 package org.helmo.reseau.servers;
 
-import org.helmo.reseau.domains.Tag;
+import org.helmo.reseau.relay.RelayManager;
 import org.helmo.reseau.repositories.IServerRepositories;
 import org.helmo.reseau.clients.ClientRunnable;
 import org.helmo.reseau.domains.Server;
@@ -13,7 +13,6 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,16 +61,17 @@ public class ServerManager implements Runnable{
     }
 
     public void createTask(ClientRunnable clientRunnable, String[] message) {
-        System.out.println("[+] Creating task");
         taskManager.createTask(clientRunnable, message);
     }
     public List<String> getFollowers(String tag) {
         return server.getFollowers(tag);
     }
 
-    public void addTag(String name) {
-        if (!server.hasTag(name))
+    public boolean addTag(String name) {
+        if (!server.hasTag(name)){
             server.addTag(name);
+        }
+        return true;
     }
 
     public ClientRunnable getClient(String name) {
@@ -84,10 +84,18 @@ public class ServerManager implements Runnable{
     }
 
     public boolean addFollowedTag(String follow, String tag) {
-        return server.addFollowedTag(follow, tag);
+        boolean added = server.addFollowedTag(follow, tag);
+        if (added) {
+            saveServer();
+        }
+        return added;
     }
     public boolean addFollower(String destName, String sender) {
-        return server.addFollower(destName, sender);
+        boolean added = server.addFollower(destName, sender);
+        if (added) {
+            saveServer();
+        }
+        return added;
     }
 
     public void sendMessageToRelay(String s){

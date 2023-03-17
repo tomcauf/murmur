@@ -1,1 +1,12 @@
-{"currentDomain":"server1.godswila.guru","saltSizeInBytes":16,"multicastAddress":"224.1.1.255","multicastPort":23001,"unicastPort":12020,"relayPort":12005,"base64AES":"P3FXqAUgfhy5cTjYdWlPQBJ/d6fdpbR88YsDPWPbo14\u003d","tls":true,"users":[{"login":"lswinnen","bcryptHash":"INLvBGThoKvixpEgYybyuga6i3T/bZ.","bcryptRound":14,"bcryptSalt":"Ox638VtIhBYPwvpe9D1qYO","followers":["louis@server1.godswila.guru","swilabus@server2.godswila.guru"],"userTags":["#tendance123@server1.godswila.guru"],"lockoutCounter":0},{"login":"louis","bcryptHash":"1pHAUMQJSdP/DLEfPyLP1yKEHzZC6Ha","bcryptRound":14,"bcryptSalt":"SgGU5pjzh.mcK6tgeesc4u","followers":[],"userTags":["#tendance123@server1.godswila.guru","#tendance456@server2.godswila.guru","#tendance789@server2.godswila.guru"],"lockoutCounter":0}],"tags":[{"name":"#tendance123","users":["louis@server1.godswila.guru","lswinnen@server1.godswila.guru","swilabus@server2.godswila.guru"]}]}
+{
+  "currentDomain": "server1.godswila.guru",
+  "saltSizeInBytes": 16,
+  "multicastAddress": "224.1.1.255",
+  "multicastPort": 23001,
+  "unicastPort": 12020,
+  "relayPort": 12005,
+  "base64AES": "P3FXqAUgfhy5cTjYdWlPQBJ/d6fdpbR88YsDPWPbo14\u003d",
+  "tls": true,
+  "users": [],
+  "tags": []
+}

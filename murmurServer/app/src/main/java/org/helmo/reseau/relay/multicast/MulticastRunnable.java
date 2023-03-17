@@ -1,4 +1,4 @@
-package org.helmo.reseau.multicast;
+package org.helmo.reseau.relay.multicast;
 
 import org.helmo.reseau.domains.Server;
 import org.helmo.reseau.grammar.Protocol;

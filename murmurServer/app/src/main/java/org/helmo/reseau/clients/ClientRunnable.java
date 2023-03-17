@@ -205,5 +205,6 @@ public class ClientRunnable implements Runnable, Closeable {
 
     public void addFollowedTag(String follow) {
         user.addFollowedTag(follow);
+        serverManager.saveServer();
     }
 }
