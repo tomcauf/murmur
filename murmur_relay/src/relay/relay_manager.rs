@@ -1,13 +1,10 @@
 use crate::domains::relay::Relay;
-use crate::domains::server::Server;
 use crate::grammar::protocol::Protocol;
-use crate::servers::server_runnable::{ServerRunnable, self};
+use crate::servers::server_runnable::ServerRunnable;
 use crate::{NetChooser, infrastructures::json_repositories::JsonRepositories};
 use std::collections::HashMap;
 use std::net::{UdpSocket, SocketAddr, Ipv4Addr};
-use std::rc::Rc;
 use std::sync::{Mutex, Arc};
-use std::thread::Thread;
 
 #[derive(Clone)]
 pub struct RelayManager{
@@ -17,7 +14,6 @@ pub struct RelayManager{
     server_list : Arc<Mutex<HashMap<String, ServerRunnable>>>
 }
 impl RelayManager {
-    
     pub fn new(repositories : JsonRepositories, net_chooser : NetChooser, protocol : Protocol) -> Self {
         RelayManager {
             repositories,
@@ -30,9 +26,7 @@ impl RelayManager {
     pub fn start(&self) {
         let relay = self.repositories.get_relay();
         let selected_interface = self.net_chooser.select_interface();
-        //Affiche les info de selection de l'interface
         println!("[*] Selected interface: {}", selected_interface.name);
-        //Get ipv4 address
         let ipv4_addr = selected_interface.addr.iter().find(|addr| addr.ip().is_ipv4());
         if ipv4_addr.is_none() {
             println!("[!] No ipv4 address found for selected interface");
@@ -108,6 +102,7 @@ impl RelayManager {
                server.add_message(message);
            },
            None => {}
+
        }
     }
 }
