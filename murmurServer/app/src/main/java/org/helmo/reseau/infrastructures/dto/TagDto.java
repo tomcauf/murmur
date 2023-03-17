@@ -3,8 +3,8 @@ package org.helmo.reseau.infrastructures.dto;
 import java.util.List;
 
 public class TagDto {
-    String name;
-    List<String> users;
+    private final String name;
+    private final List<String> users;
 
     public TagDto(String name, List<String> users) {
         this.name = name;
@@ -13,7 +13,6 @@ public class TagDto {
     public String getName() {
         return name;
     }
-
     public List<String> getUsers() {
         return users;
     }

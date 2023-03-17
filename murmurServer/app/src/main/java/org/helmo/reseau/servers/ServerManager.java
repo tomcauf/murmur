@@ -1,5 +1,6 @@
 package org.helmo.reseau.servers;
 
+import org.helmo.reseau.relay.RelayManager;
 import org.helmo.reseau.repositories.IServerRepositories;
 import org.helmo.reseau.clients.ClientRunnable;
 import org.helmo.reseau.domains.Server;
@@ -12,53 +13,29 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class ServerManager {
-    private IServerRepositories repositories;
-    private TLSSocketFactory tlsSocketFactory;
-    private TaskManager taskManager;
-    private List<ClientRunnable> clientList;
-    private Server server;
+public class ServerManager implements Runnable{
+    private final IServerRepositories repositories;
+    private final TLSSocketFactory tlsSocketFactory;
+    private final TaskManager taskManager;
+    private final List<ClientRunnable> clientList;
+    private final Server server;
+    private final RelayManager relayManager;
 
-    public ServerManager(IServerRepositories repositories, TLSSocketFactory tlsSocketFactory, TaskManager taskManager){
+    public ServerManager(IServerRepositories repositories, TLSSocketFactory tlsSocketFactory, TaskManager taskManager, RelayManager relayManager){
         this.repositories = repositories;
         this.server = repositories.getServer();
         this.tlsSocketFactory = tlsSocketFactory;
         this.taskManager = taskManager;
         this.clientList = Collections.synchronizedList(new ArrayList<>());
+        this.relayManager = relayManager;
     }
 
-    public void startServer() {
-        SSLServerSocketFactory sslServerSocketFactory = tlsSocketFactory.getServerSocketFactory();
-        Protocol protocol = new Protocol();
 
-        try(SSLServerSocket serverSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(server.getUnicastPort(), 100, InetAddress.getByName(server.getDomain()))) {
-            System.out.println("[*] Server started at " + server.getDomain() + ":" + server.getUnicastPort());
-            new Thread(new TaskExecutor(taskManager, this, protocol)).start();
-            //TODO: Voir avec Ahmed si c'est bien ça ?
-            //RelayRunnable relayRunnable = new RelayRunnable(server.getDomain(),server.getMulticastPort(),server.getMulticastAddress(),server.getRelayPort());
-            //Thread networkSelectorThread = new Thread(relayRunnable);
-            //networkSelectorThread.start();
-            while (true) {
-                SSLSocket clientSocket = (SSLSocket) serverSocket.accept();
-                System.out.println("[+] New client connected");
-
-                ClientRunnable client = new ClientRunnable(clientSocket, this, protocol);
-                clientList.add(client);
-                (new Thread(client)).start();
-            }
-
-        } catch (IOException e){
-            System.out.println("[!] Error 1ServerManager.startServer: " + e.getMessage());
-        } catch (Exception e){
-            System.out.println("[!] Error 2ServerManager.startServer: " + Arrays.toString(e.getStackTrace()));
-        }
-    }
     public void closeClient(ClientRunnable client){
         client.close();
         clientList.remove(client);
@@ -84,16 +61,17 @@ public class ServerManager {
     }
 
     public void createTask(ClientRunnable clientRunnable, String[] message) {
-        System.out.println("[+] Creating task");
         taskManager.createTask(clientRunnable, message);
     }
     public List<String> getFollowers(String tag) {
         return server.getFollowers(tag);
     }
 
-    public void addTag(String name) {
-        if (!server.hasTag(name))
+    public boolean addTag(String name) {
+        if (!server.hasTag(name)){
             server.addTag(name);
+        }
+        return true;
     }
 
     public ClientRunnable getClient(String name) {
@@ -105,7 +83,48 @@ public class ServerManager {
         return null;
     }
 
-    public void addFollowedTag(String follow, String tag) {
-        server.addFollowedTag(follow, tag);
+    public boolean addFollowedTag(String follow, String tag) {
+        boolean added = server.addFollowedTag(follow, tag);
+        if (added) {
+            saveServer();
+        }
+        return added;
+    }
+    public boolean addFollower(String destName, String sender) {
+        boolean added = server.addFollower(destName, sender);
+        if (added) {
+            saveServer();
+        }
+        return added;
+    }
+
+    public void sendMessageToRelay(String s){
+        relayManager.sendMessageToRelay(s);
+    }
+
+    @Override
+    public void run() {
+        SSLServerSocketFactory sslServerSocketFactory = tlsSocketFactory.getServerSocketFactory();
+        Protocol protocol = new Protocol();
+
+        try(SSLServerSocket serverSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(server.getUnicastPort())){
+            System.out.println("[*] Server started at " + serverSocket.getInetAddress().getHostAddress() + ":" + server.getUnicastPort());
+            new Thread(new TaskExecutor(taskManager, this, protocol)).start();
+            while (true) {
+                SSLSocket clientSocket = (SSLSocket) serverSocket.accept();
+                System.out.println("[+] New client connected");
+                ClientRunnable client = new ClientRunnable(clientSocket, this, protocol);
+                clientList.add(client);
+                (new Thread(client)).start();
+            }
+        } catch (IOException e){
+            System.out.println("[!] Error 1ServerManager.startServer: " + e.getMessage());
+        } catch (Exception e){
+            System.out.println("[!] Error 2ServerManager.startServer: " + Arrays.toString(e.getStackTrace()));
+        }
+    }
+
+    public List<String> getTags() {
+        return server.getTags();
     }
 }

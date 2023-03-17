@@ -16,10 +16,15 @@ public class TaskManager {
     }
 
     public void createTask(ClientRunnable clientRunnable, String[] message) {
+        System.out.println("[+] Create task: " + message[0]);
         tasks.add(new Task(idCounter++, message[0], clientRunnable, message, StatusOfTask.WAITING));
     }
 
     public Task getNextTask() {
         return tasks.poll();
+    }
+
+    public int getId() {
+        return idCounter;
     }
 }

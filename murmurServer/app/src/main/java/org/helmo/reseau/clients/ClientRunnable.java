@@ -13,9 +13,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ClientRunnable implements Runnable, Closeable {
-    private SSLSocket clientSocket;
-    private ServerManager serverManager;
-    private Protocol protocol;
+    private final SSLSocket clientSocket;
+    private final ServerManager serverManager;
+    private final Protocol protocol;
     private User user;
     private BufferedReader in;
     private PrintWriter out;
@@ -56,10 +56,9 @@ public class ClientRunnable implements Runnable, Closeable {
     }
 
     private void handleMessage(String msg) {
-        System.out.println("[ClientRunnable] handleMessage: " + msg);
+        System.out.println("[C] Message: " + msg);
         String[] message = protocol.verifyMessage(msg);
-        //TODO: Voir avec le prof si je peux le mettre directement ici
-        if(message[0].equals("DISCONNECT")) {
+        if (message[0].equals("DISCONNECT")) {
             sendMessage(protocol.buildOk("Disconnecting"));
             serverManager.closeClient(this);
         } else if (message[0].equals("-ERR") && !isAuthentified) {
@@ -98,7 +97,7 @@ public class ClientRunnable implements Runnable, Closeable {
 
             String salt = decryptedHash[3].substring(0, saltSize);
             String hash = decryptedHash[3].substring(saltSize);
-
+            System.out.println("User: " + name + "  ");
             User user = new User(name, hash, Integer.parseInt(decryptedHash[2]), salt, new ArrayList<>(), new ArrayList<>(), 0);
             if (serverManager.registerUser(user)) {
                 sendMessage(protocol.buildOk("User registered"));
@@ -193,9 +192,6 @@ public class ClientRunnable implements Runnable, Closeable {
     public void close() {
         try {
             isOnServer = false;
-            //TODO: Demander si je dois faire le in.close() et out.close()
-            //in.close();
-            //out.close();
             clientSocket.close();
         } catch (Exception e) {
             System.out.println("[!] Error ClientRunnable.close: " + e.getMessage());
@@ -208,5 +204,6 @@ public class ClientRunnable implements Runnable, Closeable {
 
     public void addFollowedTag(String follow) {
         user.addFollowedTag(follow);
+        serverManager.saveServer();
     }
 }

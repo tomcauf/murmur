@@ -20,10 +20,10 @@ public class ServerMapper {
         return new Server(server.getDomain(), server.getSaltSizeInBytes(), server.getMulticastAddress(), server.getMulticastPort(), server.getUnicastPort(), server.getRelayPort(), server.getBase64AES(), server.isTls(), users, tags);
     }
 
-    public ServerDto getServerDto(Server server){
+    public ServerDto getServerDto(Server server) {
         List<UserDto> users = server.getUserList().stream().map(u -> new UserDto(u.getLogin(), u.getBcryptHash(), u.getBcryptRound(), u.getBcryptSalt(), u.getFollowers(), u.getUserTags(), u.getLockoutCounter())).collect(Collectors.toList());
         List<TagDto> tags = server.getTagsList().stream().map(t -> new TagDto(t.getName(), t.getUsers())).collect(Collectors.toList());
 
-         return new ServerDto(server.getDomain(), server.getSaltSizeInBytes(), server.getMulticastAddress(), server.getMulticastPort(), server.getUnicastPort(), server.getRelayPort(), server.getBase64AES(), server.isTls(), users, tags);
+        return new ServerDto(server.getDomain(), server.getSaltSizeInBytes(), server.getMulticastAddress(), server.getMulticastPort(), server.getUnicastPort(), server.getRelayPort(), server.getBase64AES(), server.isTls(), users, tags);
     }
 }
