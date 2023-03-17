@@ -27,10 +27,6 @@ impl AESCodec {
             msg: message.as_bytes(),
             aad: &[],
         };
-
-        println!("Length of message: {}", message.len());
-        println!("Length of IV: {}", iv.len());
-
         let encrypted_message = cipher.encrypt(GenericArray::from_slice(&iv), payload).unwrap();
 
         let message_string = base64::encode(&encrypted_message);
@@ -38,7 +34,6 @@ impl AESCodec {
 
         let message = format!("{}{}", message_string, iv_string);
 
-        println!("Encrypted message: {}", message);
         Ok(message)
     }
     
@@ -49,24 +44,17 @@ impl AESCodec {
         let message = base64::decode(messageParts.0);
         let iv = base64::decode(messageParts.1);
 
-        // create a new cipher with the key
         let cipher = Aes256Gcm::new(GenericArray::from_slice(&key));
 
-        // create a payload from the message and IV
         let payload = Payload {
             msg: &message.unwrap(),
             aad: &[],
         };
-        //println!("Length of message: {}", message.unwrap().len());
-        //println!("Length of IV: {}", iv.unwrap().len());
+
         let iv2 = iv.unwrap();
-        // decrypt the message using the cipher and IV
         let decrypted_message = cipher.decrypt(GenericArray::from_slice(&iv2), payload).unwrap();
 
-        // convert the decrypted message to a string
         let message_string = String::from_utf8(decrypted_message).unwrap();
-
-        println!("Decrypted message: {}", message_string);
         Ok(message_string)
     }
 }

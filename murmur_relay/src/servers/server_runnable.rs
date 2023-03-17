@@ -1,13 +1,5 @@
-use std::{io::{Read, Write}, net::{SocketAddr, TcpStream}, rc::Rc, sync::{Arc, Mutex}, collections::HashMap};
-
-use crate::{relay::relay_manager::RelayManager, domains::server, grammar::protocol::Protocol, utils::aes_codec::{AESCodec, self}};
-
-use aes::{Aes128, Block};
-use aes::cipher::{
-    BlockCipher, BlockEncrypt, BlockDecrypt, KeyInit,
-    generic_array::GenericArray,
-};
-
+use std::{io::{Read, Write}, net::{SocketAddr, TcpStream}, sync::{Arc, Mutex}};
+use crate::{relay::relay_manager::RelayManager, grammar::protocol::Protocol, utils::aes_codec::AESCodec};
 
 #[derive(Clone)]
 pub struct ServerRunnable{
@@ -32,7 +24,7 @@ impl ServerRunnable{
     }
     pub fn start(&self){
         let mut buffer = [0; 1024];
-        println!("[[*]] ServerRunnable run : {}", self.socket_addr);
+        println!("[*] ServerRunnable run : {}", self.socket_addr);
         let mut stream = TcpStream::connect(self.socket_addr).unwrap();
         stream = stream.try_clone().unwrap();
         stream.set_nonblocking(true).unwrap();
@@ -42,9 +34,6 @@ impl ServerRunnable{
                     let message_received = String::from_utf8_lossy(&buffer[..size]);
                     if size > 0 {
                         let message_received = message_received.trim_end_matches("\r ").trim_end_matches("\n").trim_end_matches("\r\n");
-                        println!("Message received : {}", message_received);
-                        println!("Key : {}", self.base64_aes);
-                        println!("Message received size : {}", size);
                         let message_handle = message_received.to_string().as_str().to_string();
                         self.handle_message(&message_handle);
                     }
@@ -53,7 +42,7 @@ impl ServerRunnable{
                     //println!("Waiting for multicast message: {}", &self.base64_aes);
                 }
                 Err(e) => {
-                    println!("Error receiving multicast message: {}", e);
+                    println!("[!] Error receiving multicast message: {}", e);
                     self.relay_manager.remove_server(self.domain.clone());
                 }
             }
@@ -65,7 +54,7 @@ impl ServerRunnable{
                 let message_encrypt = aes_codec.encrypt(&self.base64_aes, &message_to_send).unwrap();
                 let message_encrypt = format!("{}\r\n", message_encrypt);
                 let message_ecrypt = message_encrypt.as_bytes();
-                println!("Message to send : {}", message_encrypt);
+                println!("[*] Message to send : {}", message_encrypt);
                 let writerResult = stream.write(message_ecrypt).unwrap();
                 stream.flush().unwrap();
                 if writerResult == 0 {
@@ -73,7 +62,7 @@ impl ServerRunnable{
                 } else if writerResult != message_encrypt.len() {
                     println!("[!] Error sending message");
                 } else {
-                    println!("[*] Message sent");
+                    println!("[+] Message sent");
                 }
             }
         }
@@ -83,7 +72,7 @@ impl ServerRunnable{
     
         let aes_codec = AESCodec::new();
         let message = aes_codec.decrypt(&self.base64_aes, message_received.as_bytes().to_vec()).unwrap();
-        println!("Message received : {}", message);
+        println!("[*] Message received : {}", message);
         let check_message = self.protocol.verify_message(&message);
         if check_message[0] == "SEND" {
             let nom_tag_domaine = &check_message[3];

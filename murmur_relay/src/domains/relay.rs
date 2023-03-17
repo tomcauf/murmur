@@ -1,5 +1,4 @@
-use crate::domains::server::Server; // Importer le module server
-
+use crate::domains::server::Server;
 pub struct Relay {
     multicast_address: String,
     multicast_port: u16,
@@ -28,7 +27,6 @@ impl Relay {
     }
     
     pub fn get_server(&self, domaine : &str) -> Server {
-    //Regarder dans la liste des serveurs si le domaine existe
         for server in &self.server_list {
             if server.get_domain() == domaine {
                 let domain = server.get_domain().to_string();

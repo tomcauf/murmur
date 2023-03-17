@@ -31,14 +31,14 @@ impl RelayManager {
         let relay = self.repositories.get_relay();
         let selected_interface = self.net_chooser.select_interface();
         //Affiche les info de selection de l'interface
-        println!("Selected interface: {}", selected_interface.name);
+        println!("[*] Selected interface: {}", selected_interface.name);
         //Get ipv4 address
         let ipv4_addr = selected_interface.addr.iter().find(|addr| addr.ip().is_ipv4());
         if ipv4_addr.is_none() {
-            println!("No ipv4 address found for selected interface");
+            println!("[!] No ipv4 address found for selected interface");
             return;
         }else{
-            println!("Selected interface ipv4 address: {}", ipv4_addr.unwrap().ip());
+            println!("[+] Selected interface ipv4 address: {}", ipv4_addr.unwrap().ip());
             let ipv4adrr : Ipv4Addr = ipv4_addr.unwrap().ip().to_string().parse().unwrap();
             std::thread::sleep(std::time::Duration::from_secs(1));
             match Self::multicast_function(self,relay, ipv4adrr) {
@@ -49,43 +49,25 @@ impl RelayManager {
     }
 
     fn multicast_function(&self,relay: Relay, ipv4 : Ipv4Addr) -> Result<(), std::io::Error> {
-        //You need to set reuseAddr: true when creating your socket:
         let multicast_socket = UdpSocket::bind(format!("0.0.0.0:{}", relay.get_multicast_port()))?;
-
-        // Définit l'option SO_REUSEADDR pour le socket
-        //Ne fonctionne pas
-        /*let fd = multicast_socket.as_raw_fd();
-        let optval: c_int = 1;
-        let result = unsafe {
-            setsockopt(
-                fd,
-                SOL_SOCKET,
-                SO_REUSEPORT,
-                &optval as *const c_int as *const libc::c_void,
-                std::mem::size_of::<c_int>() as socklen_t,
-            )
-        };*/
-
         let multicast_addr: std::net::SocketAddrV4 = format!("{}:{}", relay.get_multicast_address(), 0).parse().unwrap();
 
         multicast_socket.join_multicast_v4(&multicast_addr.ip(), &ipv4)?;
         multicast_socket.set_nonblocking(true)?;
-        println!("Listening for multicast messages on {}", multicast_addr);
-        println!("Multicast messages will be sent to {}", relay.get_multicast_address());
         let mut buf = [0; 1024];
         loop {
             match multicast_socket.recv_from(&mut buf) {
                 Ok((amt, src)) => {
                     let message_received = String::from_utf8_lossy(&buf[..amt]);
-                    println!("Received {} bytes from {}", amt, src);
-                    println!("Message received: {}", message_received);
+                    println!("[+] Received {} bytes from {}", amt, src);
+                    println!("[+] Message received: {}", message_received);
                     RelayManager::handle_message(self,&message_received, src);
                 }
                 Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
                     //println!("Waiting for multicast message");
                 }
                 Err(e) => {
-                    println!("Error receiving multicast message: {}", e);
+                    println!("[!] Error receiving multicast message: {}", e);
                 }
             }
             drop(&multicast_socket);
@@ -95,7 +77,6 @@ impl RelayManager {
     fn handle_message(&self, message_received: &str, ip_address: SocketAddr) {
         let check_message = self.protocol.verify_message(message_received);
         if check_message[0] == "ECHO" {
-            println!("Message received is an echo message : {}", check_message[0]);
             let port = &check_message[1];
             let domain = &check_message[2];
             let relay = self.repositories.get_relay();
@@ -106,15 +87,12 @@ impl RelayManager {
 
                 let mut server_list = self.server_list.lock().unwrap();
                 server_list.insert(domain.to_string(), server_runnable);
-                println!("Server list: {:?}" , server_list.keys());
                 let server_runnable = server_list.get(domain).unwrap();
                 let runnable = server_runnable.clone();
                 std::thread::spawn(move || {
                     runnable.start();
                 });
             }
-        }else{
-            println!("Message received is not an echo message : {}", message_received);
         }
     }
     
@@ -127,13 +105,9 @@ impl RelayManager {
         let server_list = self.server_list.lock().unwrap();
        match server_list.get(&domain) {
            Some(server) => {
-                println!("Server found");
                server.add_message(message);
            },
-           None => {
-               println!("Server not found");
-           }
-           
+           None => {}
        }
     }
 }
