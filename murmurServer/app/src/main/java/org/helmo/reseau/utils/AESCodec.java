@@ -8,13 +8,13 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 // Ressource de Monsieur Swinnen : https://www.javainterviewpoint.com/java-aes-256-gcm-encryption-and-decryption/
-public class AESEncryption {
+public class AESCodec {
     public static final int GCM_IV_LENGTH = 12;
     public static final int GCM_TAG_LENGTH = 16;
 
     private String key;
 
-    public AESEncryption(String key) {
+    public AESCodec(String key) {
         this.key = key;
     }
 

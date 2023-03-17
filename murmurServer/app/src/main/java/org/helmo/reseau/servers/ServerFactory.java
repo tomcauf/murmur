@@ -36,7 +36,6 @@ public class ServerFactory {
 
         TaskManager taskManager = new TaskManager();
 
-
         relayManager = new RelayManager(repositories, taskManager, selectedInterface);
         serverManager = new ServerManager(repositories, tlsSocketFactory, taskManager, relayManager);
 

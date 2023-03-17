@@ -14,13 +14,14 @@ public class NetChooser {
 
     public NetChooser() {
         loadInterfaces();
-        Scanner console = new Scanner(System.in);
-        String[] allInterfaceNames = getInterfaces();
-        for (int index = 0; index < allInterfaceNames.length; ++index) {
-            System.out.printf("%d. %s\n", index, allInterfaceNames[index]);
+        try (Scanner console = new Scanner(System.in)) {
+            String[] allInterfaceNames = getInterfaces();
+            for (int index = 0; index < allInterfaceNames.length; ++index) {
+                System.out.printf("%d. %s\n", index, allInterfaceNames[index]);
+            }
+            System.out.printf("[*] Select your interface :");
+            selectedInterface = getInterfacesByIndex(console.nextInt());
         }
-        System.out.printf("[*] Select your interface :");
-        selectedInterface = getInterfacesByIndex(console.nextInt());
         System.out.printf("[+] Selected interface: %s\n", selectedInterface.getDisplayName());
 
     }

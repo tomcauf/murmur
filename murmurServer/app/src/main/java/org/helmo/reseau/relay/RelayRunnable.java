@@ -2,7 +2,7 @@ package org.helmo.reseau.relay;
 
 import org.helmo.reseau.grammar.Protocol;
 import org.helmo.reseau.tasks.TaskManager;
-import org.helmo.reseau.utils.AESEncryption;
+import org.helmo.reseau.utils.AESCodec;
 
 import java.io.*;
 import java.net.Socket;
@@ -15,11 +15,11 @@ public class RelayRunnable implements Runnable {
     private final TaskManager taskManager;
     private final Protocol protocol;
     private Socket client;
-    private final AESEncryption aesEncryption;
+    private final AESCodec aesEncryption;
     private boolean isConnected;
     private RelayManager relayManager;
 
-    public RelayRunnable(TaskManager taskManager, Protocol protocol, Socket relaySocket, RelayManager relayManager, AESEncryption aesEncryption) {
+    public RelayRunnable(TaskManager taskManager, Protocol protocol, Socket relaySocket, RelayManager relayManager, AESCodec aesEncryption) {
         this.taskManager = taskManager;
         this.protocol = protocol;
         this.aesEncryption = aesEncryption;

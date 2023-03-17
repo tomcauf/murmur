@@ -5,7 +5,7 @@ import org.helmo.reseau.grammar.Protocol;
 import org.helmo.reseau.relay.multicast.MulticastRunnable;
 import org.helmo.reseau.repositories.IServerRepositories;
 import org.helmo.reseau.tasks.TaskManager;
-import org.helmo.reseau.utils.AESEncryption;
+import org.helmo.reseau.utils.AESCodec;
 
 import java.io.IOException;
 import java.net.NetworkInterface;
@@ -55,7 +55,7 @@ public class RelayManager implements Runnable {
             new Thread(multicastRunnable).start();
             while (true) {
                 Socket relaySocket = serverSocket.accept();
-                relayRunnable = new RelayRunnable(taskManager, protocol, relaySocket, this, new AESEncryption(repo.getServer().getBase64AES()));
+                relayRunnable = new RelayRunnable(taskManager, protocol, relaySocket, this, new AESCodec(repo.getServer().getBase64AES()));
                 System.out.println("[*] Relay connected");
                 (new Thread(relayRunnable)).start();
             }
