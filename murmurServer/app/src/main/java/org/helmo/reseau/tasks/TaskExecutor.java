@@ -24,11 +24,6 @@ public class TaskExecutor implements Runnable {
     @Override
     public void run() {
         while (true) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                System.out.println("[!] Error TaskExecutor.run: " + e.getMessage());
-            }
             Task currentTask = taskManager.getNextTask();
             if (currentTask != null) {
                 runTask(currentTask);

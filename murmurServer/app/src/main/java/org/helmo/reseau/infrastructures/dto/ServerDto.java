@@ -23,6 +23,7 @@ public class ServerDto {
         this.relayPort = relayPort;
         this.base64AES = base64AES;
         this.tls = tls;
+        
         this.users = users;
         this.tags = tags;
     }

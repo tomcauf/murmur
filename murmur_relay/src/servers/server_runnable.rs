@@ -46,7 +46,7 @@ impl ServerRunnable{
                     self.relay_manager.remove_server(self.domain.clone());
                 }
             }
-            
+
             let mut message = self.message.lock().unwrap();
             if message.len() > 0 {
                 let message_to_send = message.remove(0);
@@ -55,11 +55,12 @@ impl ServerRunnable{
                 let message_encrypt = format!("{}\r\n", message_encrypt);
                 let message_ecrypt = message_encrypt.as_bytes();
                 println!("[*] Message to send : {}", message_encrypt);
-                let writerResult = stream.write(message_ecrypt).unwrap();
+                let writer_result = stream.write(message_ecrypt).unwrap();
                 stream.flush().unwrap();
-                if writerResult == 0 {
+
+                if writer_result == 0 {
                     println!("[!] Error sending message");
-                } else if writerResult != message_encrypt.len() {
+                } else if writer_result != message_encrypt.len() {
                     println!("[!] Error sending message");
                 } else {
                     println!("[+] Message sent");
@@ -69,7 +70,6 @@ impl ServerRunnable{
     }
     fn handle_message(&self, message_received: &str) {
         //Le message_received peut surement avoir un caractère de fin de ligne (comme \r ou \n ou les deux). Il faut donc le supprimer
-    
         let aes_codec = AESCodec::new();
         let message = aes_codec.decrypt(&self.base64_aes, message_received.as_bytes().to_vec()).unwrap();
         println!("[*] Message received : {}", message);

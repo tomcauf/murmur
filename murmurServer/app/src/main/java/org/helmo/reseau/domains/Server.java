@@ -24,7 +24,9 @@ public class Server {
         this.relayPort = relayPort;
         this.base64AES = base64AES;
         this.tls = tls;
+        if(userList == null){ userList = new ArrayList<>();}
         this.userList = userList;
+        if(tagsList == null){ tagsList = new ArrayList<>();}
         this.tagsList = tagsList;
     }
 

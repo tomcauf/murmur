@@ -339,8 +339,8 @@ public class ProtocolTest {
 
         assert secondResult[0].equals("SEND");
         assert secondResult[1].equals("1@server1.godswila.guru");
-        assert secondResult[2].equals("#tagged@server1.godswila.guru");
-        assert secondResult[3].equals("godswila@server2.godswila.guru");
+        assert secondResult[2].equals("Mouchakk@server1.godswila.guru");
+        assert secondResult[3].equals("#tagged@server2.godswila.guru");
         assert secondResult[4].equals("FOLLOW #tagged@server2.godswila.guru");
     }
 

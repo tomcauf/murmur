@@ -1,8 +1,8 @@
-use std::{path::Path, result};
+use std::path::Path;
 use grammar::protocol::Protocol;
 use infrastructures::json_repositories::JsonRepositories;
-use relay::{relay_manager::RelayManager};
-use utils::{net_chooser::NetChooser, aes_codec::AESCodec};
+use relay::relay_manager::RelayManager;
+use utils::net_chooser::NetChooser;
 
 mod domains;
 mod grammar;

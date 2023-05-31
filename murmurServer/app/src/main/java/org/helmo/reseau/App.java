@@ -28,7 +28,6 @@ public class App {
                     }
                 }
             }
-
         }
         NetChooser netChooser = new NetChooser();
         NetworkInterface selectedInterface = netChooser.getSelectedInterface();

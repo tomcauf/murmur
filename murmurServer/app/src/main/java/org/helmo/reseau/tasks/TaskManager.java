@@ -5,13 +5,15 @@ import org.helmo.reseau.domains.StatusOfTask;
 import org.helmo.reseau.domains.Task;
 
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class TaskManager {
-    private Queue<Task> tasks;
+    private BlockingQueue<Task> tasks;
     private int idCounter;
 
     public TaskManager() {
-        this.tasks = new LinkedList<>();
+        this.tasks = new LinkedBlockingQueue<>();
         this.idCounter = 0;
     }
 
@@ -21,7 +23,12 @@ public class TaskManager {
     }
 
     public Task getNextTask() {
-        return tasks.poll();
+        try {
+            return tasks.take();
+        } catch (Exception e) {
+            System.out.println("[!] Error while getting next task");
+        }
+        return null;
     }
 
     public int getId() {
